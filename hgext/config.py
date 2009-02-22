@@ -11,22 +11,10 @@ import re
 import os.path
 
 
-# every command must take a ui and and repo as arguments.
-# opts is a dict where you can find other command line flags
-#
-# Other parameters are taken in order from items on the command line that
-# don't start with a dash.  If no default value is given in the parameter list,
-# they are required.
-# 
-# For experimenting with Mercurial in the python interpreter: 
-# Getting the repository of the current dir: 
-#    >>> from mercurial import hg, ui
-#    >>> repo = hg.repository(ui.ui(), path = ".")
-
 def local_rc(repo):
     return os.path.join(repo.path, 'hgrc')
 
-def getconfigs(ui, repo):
+def get_configs(ui, repo):
     allconfigs = util.rcpath()
     local_config = local_rc(repo)
     allconfigs += [local_config]
@@ -53,9 +41,9 @@ def getconfigs(ui, repo):
 
     return configs
 
-def showconfigs(ui, repo, **opts):
+def show_configs(ui, repo, **opts):
     """Show config files used by hg"""
-    configs = getconfigs(ui, repo)
+    configs = get_configs(ui, repo)
 
     for c in configs:
         if c['exists']:
@@ -70,7 +58,7 @@ def showconfigs(ui, repo, **opts):
         ui.write(" %s %s %s\n" % (exists_str, c['path'], writeable_str))
 
 def show_value(ui, repo, section, key, scope = None):
-    configs = getconfigs(ui, repo)
+    configs = get_configs(ui, repo)
     output = []
     max_path_len = 0
     for c in configs:
@@ -113,11 +101,11 @@ def get_value(ui, section, key, rcfile):
 def write_value(ui, repo, section, key, value, scope = None):
     if scope == 'local':
         # easy one
-        return write_value_tofile(ui, repo, section, key, value, local_rc(repo))
+        return write_value_to_file(ui, repo, section, key, value, local_rc(repo))
     else:
         # we are here because user chose global scope or all scopes
         # may have a choice of files to edit from, start from bottom
-        configs = getconfigs(ui, repo)
+        configs = get_configs(ui, repo)
         usable_configs = []
         for c in reversed(configs):
             if scope and scope != c['scope']: continue
@@ -127,7 +115,7 @@ def write_value(ui, repo, section, key, value, scope = None):
             ui.write("no usable configs to write value to, run 'hg showconfigs'\n")
             return False
         if len(usable_configs) == 1:
-            return write_value_tofile(ui, repo, section, key, value, configs[0]['path'])
+            return write_value_to_file(ui, repo, section, key, value, configs[0]['path'])
         else:
             # give them a choice
             ui.write("multiple config files to choose from, please select:\n")
@@ -140,10 +128,10 @@ def write_value(ui, repo, section, key, value, scope = None):
                 ui.error("invalid choice\n")
                 return False
             ui.write("writing value to config [%d]\n" % choice)
-            return write_value_tofile(ui, repo, section, key, value, usable_configs[choice]['path'])
+            return write_value_to_file(ui, repo, section, key, value, usable_configs[choice]['path'])
 
 
-def write_value_tofile(ui, repo, section, key, value, rcfile):
+def write_value_to_file(ui, repo, section, key, value, rcfile):
     inside_section = False
     wrote_value = False
     new = ''
@@ -211,7 +199,7 @@ cmdtable = {
                 ('g', 'global', None, 'use global config file(s)')],
             "[options]")
         ,
-        "showconfigs": (showconfigs,
+        "showconfigs": (show_configs,
             [],
             "")
   }
