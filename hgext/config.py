@@ -48,7 +48,7 @@ def getconfigs(ui, repo):
             if os.access(f, os.W_OK):
                 writeable = True
             else:
-                writeable = Falsej
+                writeable = False
         configs.append( {'scope': scope, 'path': f, 'exists': exists, 'writeable': writeable} )
 
     return configs
@@ -63,7 +63,7 @@ def showconfigs(ui, repo, **opts):
             if c['writeable']:
                 writeable_str = ''
             else:
-                writeable_str = 'ro'
+                writeable_str = '(ro)'
         else:
             exists_str = '!'
             writeable_str = ''
