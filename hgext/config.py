@@ -113,8 +113,7 @@ def get_value(ui, section, key, rcfile):
 def write_value(ui, repo, section, key, value, scope = None):
     if scope == 'local':
         # easy one
-        write_value_tofile(ui, repo, section, key, value, local_rc(repo))
-        return
+        return write_value_tofile(ui, repo, section, key, value, local_rc(repo))
     else:
         # we are here because user chose global scope or all scopes
         # may have a choice of files to edit from, start from bottom
@@ -128,7 +127,7 @@ def write_value(ui, repo, section, key, value, scope = None):
             ui.write("no usable configs to write value to, run 'hg showconfigs'\n")
             return False
         if len(usable_configs) == 1:
-            write_value_tofile(ui, repo, section, key, value, configs[0]['path'])
+            return write_value_tofile(ui, repo, section, key, value, configs[0]['path'])
         else:
             # give them a choice
             ui.write("multiple config files to choose from, please select:\n")
@@ -136,7 +135,12 @@ def write_value(ui, repo, section, key, value, scope = None):
             for c in usable_configs:
                 ui.write("[%d] %s\n" % (i, c['path']))
                 i += 1
-            ui.prompt("which file do you want to write to: [0]", pat=None, default="0")
+            choice = int(ui.prompt("which file do you want to write to: [0]", pat=None, default="0"))
+            if choice < 0 or choice > len(usable_configs):
+                ui.error("invalid choice\n")
+                return False
+            ui.write("writing value to config [%d]\n" % choice)
+            return write_value_tofile(ui, repo, section, key, value, usable_configs[choice]['path'])
 
 
 def write_value_tofile(ui, repo, section, key, value, rcfile):
@@ -177,7 +181,7 @@ def write_value_tofile(ui, repo, section, key, value, rcfile):
 
     # write new file
     open(rcfile, 'w').write(new)
-    return value
+    return True
 
 def config(ui, repo, key, value = None, **opts):
     """View and modify local and global configuration"""
