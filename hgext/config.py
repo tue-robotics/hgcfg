@@ -77,7 +77,7 @@ def show_value(ui, repo, section, key, scope = None):
         if scope and scope != c['scope']: continue
         if c['exists']:
             value = get_value(ui, section, key, c['path'])
-            if value:
+            if value != None:
                 output.append( {'p': c['path'], 'v': value} )
                 max_path_len = max([max_path_len, len(c['path'])])
     if scope:
