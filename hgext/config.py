@@ -98,6 +98,27 @@ def get_value(ui, section, key, rcfile):
                     #ui.write(value + "\n")
     return value
 
+def get_config_choice(ui, configs, start_msg, prompt_msg, default = 0):
+    i = 0
+    ui.write(start_msg)
+    for c in configs:
+        ui.write("[%d] %s\n" % (i, c['path']))
+        i += 1
+    ui.prompt("%s: [%s]" % (prompt_msg, str(default)), pat=None, default=str(default))
+    if choice < 0 or choice > len(configs):
+        return False
+    else:
+        return choice
+
+def get_writeable_configs(ui, repo, scope = None):
+    configs = get_configs(ui, repo)
+    writeable_configs = []
+    for c in reversed(configs):
+        if scope and scope != c['scope']: continue
+        if not c['writeable']: continue
+        writeable_configs.append(c)
+    return writeable_configs
+
 def write_value(ui, repo, section, key, value, scope = None):
     if scope == 'local':
         # easy one
@@ -106,29 +127,25 @@ def write_value(ui, repo, section, key, value, scope = None):
         # we are here because user chose global scope or all scopes
         # may have a choice of files to edit from, start from bottom
         configs = get_configs(ui, repo)
-        usable_configs = []
-        for c in reversed(configs):
-            if scope and scope != c['scope']: continue
-            if not c['writeable']: continue
-            usable_configs.append(c)
-        if len(usable_configs) < 1:
-            ui.write("no usable configs to write value to, run 'hg showconfigs'\n")
+        writeable_configs = get_writeable_configs(ui, repo, scope)
+        if len(writeable_configs) < 1:
+            ui.write("no writeable configs to write value to, run 'hg showconfigs'\n")
             return False
-        if len(usable_configs) == 1:
-            return write_value_to_file(ui, repo, section, key, value, configs[0]['path'])
+        if len(writeable_configs) == 1:
+            return write_value_to_file(ui, repo, section, key, value,
+                    writeable_configs[0]['path'])
         else:
             # give them a choice
-            ui.write("multiple config files to choose from, please select:\n")
-            i = 0
-            for c in usable_configs:
-                ui.write("[%d] %s\n" % (i, c['path']))
-                i += 1
-            choice = int(ui.prompt("which file do you want to write to: [0]", pat=None, default="0"))
-            if choice < 0 or choice > len(usable_configs):
+            choice = get_config_choice(ui, writeable_configs,
+                    "multiple config files to choose from, please select:\n",
+                    "which file do you want to write to")
+            if choice:
+                ui.write("writing value to config [%d]\n" % choice)
+                return write_value_to_file(ui, repo, section, key, value,
+                        writeable_configs[int(choice)]['path'])
+            else:
                 ui.error("invalid choice\n")
                 return False
-            ui.write("writing value to config [%d]\n" % choice)
-            return write_value_to_file(ui, repo, section, key, value, usable_configs[choice]['path'])
 
 
 def write_value_to_file(ui, repo, section, key, value, rcfile):
@@ -171,6 +188,39 @@ def write_value_to_file(ui, repo, section, key, value, rcfile):
     open(rcfile, 'w').write(new)
     return True
 
+def edit_config_file(ui, rc_file):
+    contents = open(rc_file, 'r').read()
+    new_contents = ui.edit(("HG: editing hg config file: %s\n\n" % rc_file) + contents, ui.username())
+    if new_contents != contents:
+        open(rc_file, 'w').write(new_contents)
+
+def edit_config(ui, repo, **opts):
+    scope = 'local' # local by default
+    if opts['global']: scope = 'global'
+    if opts['local'] and opts['global']: scope = None # both global/local
+    if scope == 'local':
+        # easy only one choice
+        return edit_config_file(ui, local_rc(repo))
+
+    writeable_configs = get_writeable_configs(ui, repo, scope)
+    if len(writeable_configs) < 1:
+        ui.write("no editable configs to edit, run 'hg showconfigs'\n")
+        return False
+    if len(writeable_configs) == 1:
+        return edit_config_file(ui, repo, writeable_configs[0]['path'])
+    else:
+        # give them a choice
+        choice = get_config_choice(ui, writeable_configs,
+                "multiple config files to choose from, please select:\n",
+                "which file do you want to edit")
+        if choice:
+            ui.write("writing value to config [%d]\n" % choice)
+            return edit_config_file(ui, repo, writeable_configs[int(choice)]['path'])
+        else:
+            ui.error("invalid choice\n")
+            return False
+
+
 def config(ui, repo, key, value = None, **opts):
     """View and modify local and global configuration"""
     m = re.match("([a-zA-Z_]+[a-zA-Z0-9_])*\.([a-zA-Z_]+[a-zA-Z0-9\._]*)", key)
@@ -196,11 +246,16 @@ def config(ui, repo, key, value = None, **opts):
 cmdtable = {
         "config": (config,
             [('l', 'local', None, 'use local config file (default)'),
-                ('g', 'global', None, 'use global config file(s)')],
-            "[options]")
+             ('g', 'global', None, 'use global config file(s)')],
+            "")
+        ,
+        "editconfig": (edit_config,
+            [('l', 'local', None, 'edit local config file (default)'),
+             ('g', 'global', None, 'edit global config file(s)')],
+            "")
         ,
         "showconfigs": (show_configs,
             [],
             "")
-  }
+        }
 
