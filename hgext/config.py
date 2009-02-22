@@ -104,8 +104,9 @@ def get_config_choice(ui, configs, start_msg, prompt_msg, default = 0):
     for c in configs:
         ui.write("[%d] %s\n" % (i, c['path']))
         i += 1
-    ui.prompt("%s: [%s]" % (prompt_msg, str(default)), pat=None, default=str(default))
-    if choice < 0 or choice > len(configs):
+    choice = int(ui.prompt("%s: [%s]" % (prompt_msg, str(default)), pat=None, default=str(default)))
+    #ui.write("i got this: %s   %d\n" % (choice, int(choice)))
+    if choice < 0 or choice > (len(configs) - 1):
         return False
     else:
         return choice
@@ -139,13 +140,13 @@ def write_value(ui, repo, section, key, value, scope = None):
             choice = get_config_choice(ui, writeable_configs,
                     "multiple config files to choose from, please select:\n",
                     "which file do you want to write to")
-            if choice:
+            if choice is False:
+                ui.warn("invalid choice\n")
+                return False
+            else:
                 ui.write("writing value to config [%d]\n" % choice)
                 return write_value_to_file(ui, repo, section, key, value,
                         writeable_configs[int(choice)]['path'])
-            else:
-                ui.error("invalid choice\n")
-                return False
 
 
 def write_value_to_file(ui, repo, section, key, value, rcfile):
@@ -213,12 +214,12 @@ def edit_config(ui, repo, **opts):
         choice = get_config_choice(ui, writeable_configs,
                 "multiple config files to choose from, please select:\n",
                 "which file do you want to edit")
-        if choice:
+        if choice is False:
+            ui.warn("invalid choice\n")
+            return False
+        else:
             ui.write("writing value to config [%d]\n" % choice)
             return edit_config_file(ui, repo, writeable_configs[int(choice)]['path'])
-        else:
-            ui.error("invalid choice\n")
-            return False
 
 
 def config(ui, repo, key, value = None, **opts):
@@ -242,6 +243,7 @@ def config(ui, repo, key, value = None, **opts):
         # for these values, I think it's best to default to local config
         if scope == None: scope = 'local'
         write_value(ui, repo, section, key, value, scope)
+
 
 cmdtable = {
         "config": (config,
