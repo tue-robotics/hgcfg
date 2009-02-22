@@ -24,7 +24,7 @@ import os.path
 #    >>> repo = hg.repository(ui.ui(), path = ".")
 
 def local_rc(repo):
-    return repo.path + '\\hgrc'
+    return os.path.join(repo.path, 'hgrc')
 
 def getconfigs(ui, repo):
     allconfigs = util.rcpath()
