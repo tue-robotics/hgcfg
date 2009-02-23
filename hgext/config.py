@@ -55,29 +55,35 @@ def show_configs(ui, repo, **opts):
         else:
             exists_str = '!'
             writeable_str = ''
-        ui.write(" %s %s %s\n" % (exists_str, c['path'], writeable_str))
+        ui.status(" %s %s %s\n" % (exists_str, c['path'], writeable_str))
 
-def show_value(ui, repo, section, key, scope = None):
+def show_value(ui, repo, section, key, scope = None, **opts):
     configs = get_configs(ui, repo)
     output = []
-    max_path_len = 0
+    max_value_len = 0
     for c in configs:
         if scope and scope != c['scope']: continue
         if c['exists']:
             value = get_value(ui, section, key, c['path'])
             if value != None:
                 output.append( {'p': c['path'], 'v': value} )
-                max_path_len = max([max_path_len, len(c['path'])])
+                max_value_len = max([max_value_len, len(value)])
     if scope:
         scope_str = " in %s config" % scope
     else:
         scope_str = ''
     if len(output) > 0:
-        ui.write('values found for %s.%s%s:\n' % (section, key, scope_str))
+        ui.note('values found for %s.%s%s:\n' % (section, key, scope_str))
         for o in output:
-            ui.write(' %-*s  %s\n' % (max_path_len, o['p'], o['v']))
+            ui.note(' ')
+            if o is output[-1]: ui.write(o['v'])
+            else:               ui.status(o['v'])
+            ui.status('%*s' % (max_value_len - len(o['v']) + 2, ''))
+            ui.note('%s' % o['p'])
+            if o is output[-1]: ui.write("\n")
+            else:               ui.status("\n")
     else:
-        ui.write('no values found for %s.%s%s\n' % (section, key, scope_str))
+        ui.note('no values found for %s.%s%s\n' % (section, key, scope_str))
 
 def get_value(ui, section, key, rcfile):
     inside_section = False
@@ -100,9 +106,9 @@ def get_value(ui, section, key, rcfile):
 
 def get_config_choice(ui, configs, start_msg, prompt_msg, default = 0):
     i = 0
-    ui.write(start_msg)
+    ui.status(start_msg)
     for c in configs:
-        ui.write("[%d] %s\n" % (i, c['path']))
+        ui.status("[%d] %s\n" % (i, c['path']))
         i += 1
     choice = int(ui.prompt("%s: [%s]" % (prompt_msg, str(default)), pat=None, default=str(default)))
     #ui.write("i got this: %s   %d\n" % (choice, int(choice)))
@@ -130,7 +136,7 @@ def write_value(ui, repo, section, key, value, scope = None):
         configs = get_configs(ui, repo)
         writeable_configs = get_writeable_configs(ui, repo, scope)
         if len(writeable_configs) < 1:
-            ui.write("no writeable configs to write value to, run 'hg showconfigs'\n")
+            ui.warn("no writeable configs to write value to, run 'hg showconfigs'\n")
             return False
         if len(writeable_configs) == 1:
             return write_value_to_file(ui, repo, section, key, value,
@@ -144,7 +150,7 @@ def write_value(ui, repo, section, key, value, scope = None):
                 ui.warn("invalid choice\n")
                 return False
             else:
-                ui.write("writing value to config [%d]\n" % choice)
+                ui.status("writing value to config [%d]\n" % choice)
                 return write_value_to_file(ui, repo, section, key, value,
                         writeable_configs[int(choice)]['path'])
 
@@ -205,7 +211,7 @@ def edit_config(ui, repo, **opts):
 
     writeable_configs = get_writeable_configs(ui, repo, scope)
     if len(writeable_configs) < 1:
-        ui.write("no editable configs to edit, run 'hg showconfigs'\n")
+        ui.warn("no editable configs to edit, run 'hg showconfigs'\n")
         return False
     if len(writeable_configs) == 1:
         return edit_config_file(ui, repo, writeable_configs[0]['path'])
@@ -218,7 +224,7 @@ def edit_config(ui, repo, **opts):
             ui.warn("invalid choice\n")
             return False
         else:
-            ui.write("writing value to config [%d]\n" % choice)
+            ui.status("writing value to config [%d]\n" % choice)
             return edit_config_file(ui, repo, writeable_configs[int(choice)]['path'])
 
 
@@ -226,7 +232,7 @@ def config(ui, repo, key, value = None, **opts):
     """View and modify local and global configuration"""
     m = re.match("([a-zA-Z_]+[a-zA-Z0-9_])*\.([a-zA-Z_]+[a-zA-Z0-9\._]*)", key)
     if not m:
-        ui.write("invalid key syntax\n")
+        ui.warn("invalid key syntax\n")
         return
     section = m.group(1)
     key = m.group(2)
