@@ -230,7 +230,7 @@ def edit_config(ui, repo, **opts):
 
 def config(ui, repo, key, value = None, **opts):
     """View and modify local and global configuration"""
-    m = re.match("([a-zA-Z_]+[a-zA-Z0-9_])*\.([a-zA-Z_]+[a-zA-Z0-9\._]*)", key)
+    m = re.match("([a-zA-Z_]+[a-zA-Z0-9_\-]*)\.([a-zA-Z_]+[a-zA-Z0-9\._\-]*)", key)
     if not m:
         ui.warn("invalid key syntax\n")
         return
