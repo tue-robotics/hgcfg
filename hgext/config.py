@@ -214,7 +214,7 @@ def edit_config(ui, repo, **opts):
         ui.warn("no editable configs to edit, run 'hg showconfigs'\n")
         return False
     if len(writeable_configs) == 1:
-        return edit_config_file(ui, repo, writeable_configs[0]['path'])
+        return edit_config_file(ui, writeable_configs[0]['path'])
     else:
         # give them a choice
         choice = get_config_choice(ui, writeable_configs,
@@ -224,7 +224,7 @@ def edit_config(ui, repo, **opts):
             ui.warn("invalid choice\n")
             return False
         else:
-            ui.status("writing value to config [%d]\n" % choice)
+            ui.status("editing config file [%d]\n" % choice)
             return edit_config_file(ui, writeable_configs[int(choice)]['path'])
 
 
