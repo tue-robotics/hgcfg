@@ -225,7 +225,7 @@ def edit_config(ui, repo, **opts):
             return False
         else:
             ui.status("writing value to config [%d]\n" % choice)
-            return edit_config_file(ui, repo, writeable_configs[int(choice)]['path'])
+            return edit_config_file(ui, writeable_configs[int(choice)]['path'])
 
 
 def config(ui, repo, key, value = None, **opts):
