@@ -30,7 +30,6 @@ def get_configs(ui, repo):
         if not os.path.exists(f):
             exists = False
             writeable = False
-            #configs.append( {'scope': 'global', 'path': f, 'exists': False, 'writeable': False} )
         else:
             exists = True
             if os.access(f, os.W_OK):
@@ -42,7 +41,14 @@ def get_configs(ui, repo):
     return configs
 
 def show_configs(ui, repo, **opts):
-    """Show config files used by hg"""
+    """Shows all config files searched for and used by hg
+
+    This command will list all the configuration files searched for by hg in
+    order.  If a config file is present it will be prepended with '*'.  If it is
+    missing it will be prepended with '!'.  If it not writeable by the current
+    users it will be appeneded by '(ro)'.
+    """
+
     configs = get_configs(ui, repo)
 
     for c in configs:
@@ -100,8 +106,6 @@ def get_value(ui, section, key, rcfile):
                 m = re.match("\s*" + re.escape(key) + "\s*=(.*)", line)
                 if m:
                     value = m.group(1).strip()
-                    #ui.write("got the value: '%s'\n" % value)
-                    #ui.write(value + "\n")
     return value
 
 def get_config_choice(ui, configs, start_msg, prompt_msg, default = 0):
@@ -111,7 +115,6 @@ def get_config_choice(ui, configs, start_msg, prompt_msg, default = 0):
         ui.status("[%d] %s\n" % (i, c['path']))
         i += 1
     choice = int(ui.prompt("%s: [%s]" % (prompt_msg, str(default)), pat=None, default=str(default)))
-    #ui.write("i got this: %s   %d\n" % (choice, int(choice)))
     if choice < 0 or choice > (len(configs) - 1):
         return False
     else:
@@ -178,10 +181,6 @@ def write_value_to_file(ui, repo, section, key, value, rcfile):
                 if m:
                     if not ui.configbool('config', 'delete_on_replace', False):
                         new += ';' + line
-                    #if not wrote_value:
-                        ## write it now underneath the one we just commented
-                        #new.append("%s = %s" % (key, value))
-                        #wrote_value = True
                 else:
                     new += line
             else:
@@ -202,6 +201,15 @@ def edit_config_file(ui, rc_file):
         open(rc_file, 'w').write(new_contents)
 
 def edit_config(ui, repo, **opts):
+    """Edits your local or global hg configuration file
+
+    This command will launch an editor to modify the local .hg/hgrc config file
+    by default.
+
+    Use the --global option to edit global config files.  If more than one
+    writeable global config file is found, you will be prompted as to which one
+    you would like to edit.
+    """
     scope = 'local' # local by default
     if opts['global']: scope = 'global'
     if opts['local'] and opts['global']: scope = None # both global/local
@@ -229,7 +237,27 @@ def edit_config(ui, repo, **opts):
 
 
 def config(ui, repo, key, value = None, **opts):
-    """View and modify local and global configuration"""
+    """View or modify a configuration value
+
+    Example of viewing a configuration value:
+
+        hg config ui.unsername
+
+    When viewing a configuration value, all available config files will be
+    queried.  To view more information about which file contains which value,
+    enable verbose output by using the --debug option.  If more than one value
+    is listed, the last value is one currently used by hg.  You can verify this
+    by using the builtin hg command 'showconfig'.
+
+    Example of setting a configuration value:
+
+        hg config ui.username myname
+
+    When modifying or setting a value, the local configuration will be used by
+    default.  Use the --global option to set the value in a global config.  You
+    will be prompted if more than one global config exists and is writeable by
+    you.
+    """
     m = re.match("([a-zA-Z_]+[a-zA-Z0-9_\-]*)\.([a-zA-Z_]+[a-zA-Z0-9\._\-]*)", key)
     if not m:
         ui.warn("invalid key syntax\n")
@@ -255,7 +283,7 @@ cmdtable = {
         "config": (config,
             [('l', 'local', None, 'use local config file (default)'),
              ('g', 'global', None, 'use global config file(s)')],
-            "")
+            "KEY.NAME [NEW_VALUE]")
         ,
         "editconfig": (edit_config,
             [('l', 'local', None, 'edit local config file (default)'),
