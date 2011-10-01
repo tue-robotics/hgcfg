@@ -9,7 +9,7 @@ Displays or modifies local and global configuration.
 '''
 
 from mercurial import hg
-from mercurial import util
+from mercurial import scmutil
 import re
 import os.path
 
@@ -18,7 +18,7 @@ def local_rc(repo):
     return os.path.join(repo.path, 'hgrc')
 
 def get_configs(ui, repo):
-    allconfigs = util.rcpath()
+    allconfigs = scmutil.rcpath()
     local_config = local_rc(repo)
     allconfigs += [local_config]
 
