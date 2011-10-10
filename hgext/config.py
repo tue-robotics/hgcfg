@@ -10,7 +10,11 @@ Displays or modifies local and global configuration.
 import re
 import os.path
 
-from mercurial import scmutil
+from mercurial import util
+if util.version() >= '1.9':
+    from mercurial.scmutil import rcpath
+else:
+    rcpath = util.rcpath
 
 
 def local_rc(repo):
@@ -18,7 +22,7 @@ def local_rc(repo):
 
 
 def get_configs(ui, repo):
-    allconfigs = scmutil.rcpath()
+    allconfigs = rcpath()
     local_config = local_rc(repo)
     allconfigs += [local_config]
 
