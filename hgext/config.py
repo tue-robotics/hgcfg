@@ -269,7 +269,7 @@ def config(ui, repo, key, value=None, **opts):
 
     Example of viewing a configuration value:
 
-        hg config ui.unsername
+        hg config ui.username
 
     When viewing a configuration value, all available config files will be
     queried.  To view more information about which file contains which value,
