@@ -49,8 +49,8 @@ def get_configs(ui, repo):
     return configs
 
 
-def show_configs(ui, repo, **opts):
-    """Shows all config files searched for and used by hg
+def list_configs(ui, repo, **opts):
+    """List all config files searched for and used by hg
 
     This command will list all the configuration files searched for by hg in
     order.  If a config file is present it will be prepended with '*'.  If it
@@ -162,7 +162,7 @@ def write_value(ui, repo, section, key, value, scope=None):
         configs = get_configs(ui, repo)
         writeable_configs = get_writeable_configs(ui, repo, scope)
         if len(writeable_configs) < 1:
-            ui.warn("no writeable configs to write value to, run 'hg showconfigs'\n")
+            ui.warn("no writeable configs to write value to, run 'hg listconfigs'\n")
             return False
         if len(writeable_configs) == 1:
             return write_value_to_file(ui, repo, section, key, value,
@@ -247,7 +247,7 @@ def edit_config(ui, repo, **opts):
 
     writeable_configs = get_writeable_configs(ui, repo, scope)
     if len(writeable_configs) < 1:
-        ui.warn("no editable configs to edit, run 'hg showconfigs'\n")
+        ui.warn("no editable configs to edit, run 'hg listconfigs'\n")
         return False
     if len(writeable_configs) == 1:
         return edit_config_file(ui, writeable_configs[0]['path'])
@@ -320,7 +320,7 @@ cmdtable = {
             [('l', 'local', None, 'edit local config file (default)'),
              ('g', 'global', None, 'edit global config file(s)')],
             ""),
-        "showconfigs": (show_configs,
+        "listconfigs": (list_configs,
             [],
             "")
         }
