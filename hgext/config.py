@@ -31,9 +31,14 @@ def get_configs(ui, repo):
     userconfigs = set(userrcpath())
 
     configs = []
+    paths = set()
 
     # for all global configs
     for f in allconfigs:
+        if f in paths:
+            continue
+        paths.add(f)
+
         if f == local_config:
             scope = 'local'
         elif f in userconfigs:
