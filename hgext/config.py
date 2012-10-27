@@ -276,7 +276,7 @@ def config(ui, repo, key, value=None, **opts):
 
     When viewing a configuration value, all available config files will be
     queried.  To view more information about which file contains which value,
-    enable verbose output by using the --debug option.  If more than one value
+    enable verbose output by using the --verbose option.  If more than one value
     is listed, the last value is one currently used by hg.  You can verify
     this by using the builtin hg command 'showconfig'.
 
