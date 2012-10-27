@@ -298,6 +298,8 @@ def config(ui, repo, key, value=None, **opts):
     section = m.group(1)
     key = m.group(2)
 
+    default_get_scopes = set(['local', 'user', 'global'])
+    default_set_scopes = set(['local'])
     scopes = set()
     if opts['local']:
         scopes.add('local')
@@ -305,16 +307,14 @@ def config(ui, repo, key, value=None, **opts):
         scopes.add('user')
     if opts['global']:
         scopes.add('global')
-    if not scopes:
-        scopes.add('local')
 
     # no value given, we will show them the value
     if value == None:
-        show_value(ui, repo, section, key, scopes)
+        show_value(ui, repo, section, key, scopes or default_get_scopes)
     # try to set a value
     else:
         # for these values, I think it's best to default to local config
-        write_value(ui, repo, section, key, value, scopes)
+        write_value(ui, repo, section, key, value, scopes or default_set_scopes)
 
 
 cmdtable = {
