@@ -12,9 +12,10 @@ import os.path
 
 from mercurial import util
 if util.version() >= '1.9':
-    from mercurial.scmutil import rcpath
+    from mercurial.scmutil import rcpath, userrcpath
 else:
     rcpath = util.rcpath
+    userrcpath = util.userrcpath
 
 
 def local_rc(repo):
@@ -25,6 +26,7 @@ def get_configs(ui, repo):
     allconfigs = rcpath()
     local_config = local_rc(repo)
     allconfigs += [local_config]
+    userconfigs = set(userrcpath())
 
     configs = []
 
@@ -32,6 +34,8 @@ def get_configs(ui, repo):
     for f in allconfigs:
         if f == local_config:
             scope = 'local'
+        elif f in userconfigs:
+            scope = 'user'
         else:
             scope = 'global'
         if not os.path.exists(f):
@@ -67,7 +71,7 @@ def list_configs(ui, repo, **opts):
             status_str = 'rw'
         else:
             status_str = 'ro'
-        ui.status(" %s %s\n" % (status_str, c['path']))
+        ui.status(" %s %-6s %s\n" % (status_str, c['scope'], c['path']))
 
 
 def show_value(ui, repo, section, key, scope=None, **opts):
