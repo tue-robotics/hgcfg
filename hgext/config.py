@@ -290,8 +290,8 @@ def config(ui, repo, key, value=None, **opts):
 
     You will be prompted if more than one config exists and is writeable by you.
     """
-    pattern = "([a-zA-Z_]+[a-zA-Z0-9_\-]*)\.([a-zA-Z_]+[a-zA-Z0-9\._\-]*)"
-    m = re.match(pattern, key)
+    pattern = r"([a-z_][a-z0-9_-]*)\.([a-z_][a-z0-9._-]*)$"
+    m = re.match(pattern, key, re.I)
     if not m:
         ui.warn("invalid key syntax\n")
         return
