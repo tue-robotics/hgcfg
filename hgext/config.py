@@ -217,10 +217,11 @@ def write_value_to_file(ui, repo, section, key, value, rcfile):
 
 
 def edit_config_file(ui, rc_file):
-    contents = open(rc_file, 'r').read()
-    new_contents = ui.edit(("#HG: editing hg config file: %s\n\n" % rc_file) +
-        contents, ui.username())
-    if new_contents != contents:
+    orig_contents = open(rc_file, 'r').read()
+    contents = "#HG: editing hg config file: %s\n\n%s" % (
+        rc_file, orig_contents)
+    new_contents = ui.edit(contents, ui.username())
+    if new_contents != contents and new_contents != orig_contents:
         open(rc_file, 'w').write(new_contents)
 
 
