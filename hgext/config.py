@@ -11,6 +11,8 @@ import re
 import os.path
 
 from mercurial import util
+from mercurial.config import config as config_file
+
 if util.version() >= '1.9':
     from mercurial.scmutil import rcpath, userrcpath
 else:
@@ -82,17 +84,65 @@ def list_configs(ui, repo, **opts):
 
 
 def show_value(ui, repo, section, key, scopes, **opts):
-    configs = get_configs(ui, repo)
+    configs = [
+        c for c in get_configs(ui, repo)
+            if c['scope'] in scopes and c['exists']
+    ]
+    def confs():
+        for c in configs:
+            conf = config_file()
+            conf.read(c['path'])
+            yield c, conf
     output = []
     max_value_len = 0
+
+    if ui.quiet and section is None:
+        # list unique section names
+        sections = set()
+        for c, conf in confs():
+            sections.update(conf.sections())
+        for s in sorted(sections):
+            ui.write('  [%s]\n' % s)
+        return
+
+    if section is None:
+        # list names of sections in each file
+        for c, conf in confs():
+            ui.write('scope=%s\n' % c['scope'])
+            ui.write('file=%s\n' % c['path'])
+            for s in conf.sections():
+                ui.write('  [%s]\n' % s)
+            ui.write('\n')
+        return
+
+    if key is None and ui.quiet:
+        # list all unique items in section "section"
+        items = dict()
+        for c, conf in confs():
+             items.update(conf.items(section))
+        ui.write('  [%s]\n' % section)
+        for item in sorted(items.iteritems()):
+            ui.write('    %s=%s\n' % item)
+        ui.write('\n')
+        return
+
+    if key is None:
+        # list all items in section "section" in each file
+        for c, conf in confs():
+            if section in conf:
+                ui.write('scope=%s\n' % c['scope'])
+                ui.write('file=%s\n' % c['path'])
+                ui.write('  [%s]\n' % section)
+                for item in conf.items(section):
+                    ui.write('    %s=%s\n' % item)
+                ui.write('\n')
+        return
+
     for c in configs:
-        if c['scope'] not in scopes:
-            continue
-        if c['exists']:
-            value = get_value(ui, section, key, c['path'])
-            if value != None:
-                output.append({'p': c['path'], 'v': value})
-                max_value_len = max([max_value_len, len(value)])
+        value = get_value(ui, section, key, c['path'])
+        if value != None:
+            output.append({'p': c['path'], 'v': value})
+            max_value_len = max([max_value_len, len(value)])
     scope_str = " in %s config" % '/'.join(scopes)
     if len(output) > 0:
         ui.note('values found for %s.%s%s:\n' % (section, key, scope_str))
@@ -267,8 +317,12 @@ def edit_config(ui, repo, **opts):
             return edit_config_file(ui, writeable_configs[int(choice)]['path'])
 
 
-def config(ui, repo, key, value=None, **opts):
+def config(ui, repo, key='', value=None, **opts):
     """View or modify a configuration value
+
+    Example of viewing a configuration section:
+
+        hg config paths
 
     Example of viewing a configuration value:
 
@@ -280,6 +334,9 @@ def config(ui, repo, key, value=None, **opts):
     is listed, the last value is one currently used by hg.  You can verify
     this by using the builtin hg command 'showconfig'.
 
+    Using the --quiet option shows a combined result instead of listing results
+    for each config file separately.
+
     Example of setting a configuration value:
 
         hg config ui.username myname
@@ -290,7 +347,7 @@ def config(ui, repo, key, value=None, **opts):
 
     You will be prompted if more than one config exists and is writeable by you.
     """
-    pattern = r"([a-z_][a-z0-9_-]*)\.([a-z_][a-z0-9._-]*)$"
+    pattern = r"(?:([a-z_][a-z0-9_-]*)(?:\.([a-z_][a-z0-9._-]*))?)?$"
     m = re.match(pattern, key, re.I)
     if not m:
         ui.warn("invalid key syntax\n")
@@ -322,7 +379,7 @@ cmdtable = {
             [('l', 'local', None, 'use local config file (default)'),
              ('u', 'user', None, 'use per-user config file(s)'),
              ('g', 'global', None, 'use global config file(s)')],
-             "KEY.NAME [NEW_VALUE]"),
+             "[KEY[.NAME]] [NEW_VALUE]"),
         "editconfig": (edit_config,
             [('l', 'local', None, 'edit local config file (default)'),
              ('u', 'user', None, 'use per-user config file(s)'),
