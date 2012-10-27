@@ -233,15 +233,20 @@ def edit_config(ui, repo, **opts):
     This command will launch an editor to modify the local .hg/hgrc config
     file by default.
 
-    Use the --global option to edit global config files.  If more than one
-    writeable global config file is found, you will be prompted as to which
-    one you would like to edit.
+    Use the --user option to edit personal config files.
+
+    Use the --global option to edit global config files.
+
+    If more than one writeable config file is found, you will be prompted
+    as to which one you would like to edit.
     """
     scope = 'local'  # local by default
     if opts['global']:
         scope = 'global'
-    if opts['local'] and opts['global']:
-        scope = None  # both global/local
+    if opts['user']:
+        scope = 'user'
+    if opts['local']:
+        scope = 'local'
     if scope == 'local':
         # easy only one choice
         return edit_config_file(ui, local_rc(repo))
@@ -283,9 +288,10 @@ def config(ui, repo, key, value=None, **opts):
         hg config ui.username myname
 
     When modifying or setting a value, the local configuration will be used by
-    default.  Use the --global option to set the value in a global config.
-    You will be prompted if more than one global config exists and is
-    writeable by you.
+    default.  Use the --user option to set the value in a per-user config.
+    Use the --global option to set the value in a global config.
+
+    You will be prompted if more than one config exists and is writeable by you.
     """
     pattern = "([a-zA-Z_]+[a-zA-Z0-9_\-]*)\.([a-zA-Z_]+[a-zA-Z0-9\._\-]*)"
     m = re.match(pattern, key)
@@ -296,10 +302,12 @@ def config(ui, repo, key, value=None, **opts):
     key = m.group(2)
 
     scope = None
-    if opts['local']:
-        scope = 'local'
     if opts['global']:
         scope = 'global'
+    if opts['user']:
+        scope = 'user'
+    if opts['local']:
+        scope = 'local'
 
     # no value given, we will show them the value
     if value == None:
@@ -315,10 +323,12 @@ def config(ui, repo, key, value=None, **opts):
 cmdtable = {
         "config": (config,
             [('l', 'local', None, 'use local config file (default)'),
+             ('u', 'user', None, 'use per-user config file(s)'),
              ('g', 'global', None, 'use global config file(s)')],
              "KEY.NAME [NEW_VALUE]"),
         "editconfig": (edit_config,
             [('l', 'local', None, 'edit local config file (default)'),
+             ('u', 'user', None, 'use per-user config file(s)'),
              ('g', 'global', None, 'edit global config file(s)')],
             ""),
         "listconfigs": (list_configs,
