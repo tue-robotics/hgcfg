@@ -25,7 +25,9 @@ def local_rc(repo):
 def get_configs(ui, repo):
     allconfigs = rcpath()
     local_config = local_rc(repo)
-    allconfigs += [local_config]
+    # rcpath() returns a reference to a global list, must not modify
+    # it in place by "+=" but instead create a copy by "+".
+    allconfigs = allconfigs + [local_config]
     userconfigs = set(userrcpath())
 
     configs = []
