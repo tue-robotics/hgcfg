@@ -129,7 +129,7 @@ def get_config_choice(ui, configs, start_msg, prompt_msg, default=0):
     for c in configs:
         ui.status("[%d] %s\n" % (i, c['path']))
         i += 1
-    choice = int(ui.prompt("%s: [%s]" % (prompt_msg, str(default)), pat=None,
+    choice = int(ui.prompt("%s: [%s]" % (prompt_msg, str(default)),
         default=str(default)))
     if choice < 0 or choice > (len(configs) - 1):
         return False
