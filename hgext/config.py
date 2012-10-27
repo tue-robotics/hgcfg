@@ -74,22 +74,19 @@ def list_configs(ui, repo, **opts):
         ui.status(" %s %-6s %s\n" % (status_str, c['scope'], c['path']))
 
 
-def show_value(ui, repo, section, key, scope=None, **opts):
+def show_value(ui, repo, section, key, scopes, **opts):
     configs = get_configs(ui, repo)
     output = []
     max_value_len = 0
     for c in configs:
-        if scope and scope != c['scope']:
+        if c['scope'] not in scopes:
             continue
         if c['exists']:
             value = get_value(ui, section, key, c['path'])
             if value != None:
                 output.append({'p': c['path'], 'v': value})
                 max_value_len = max([max_value_len, len(value)])
-    if scope:
-        scope_str = " in %s config" % scope
-    else:
-        scope_str = ''
+    scope_str = " in %s config" % '/'.join(scopes)
     if len(output) > 0:
         ui.note('values found for %s.%s%s:\n' % (section, key, scope_str))
         for o in output:
@@ -140,11 +137,11 @@ def get_config_choice(ui, configs, start_msg, prompt_msg, default=0):
         return choice
 
 
-def get_writeable_configs(ui, repo, scope=None):
+def get_writeable_configs(ui, repo, scopes):
     configs = get_configs(ui, repo)
     writeable_configs = []
     for c in reversed(configs):
-        if scope and scope != c['scope']:
+        if c['scope'] not in scopes:
             continue
         if not c['writeable']:
             continue
@@ -152,34 +149,27 @@ def get_writeable_configs(ui, repo, scope=None):
     return writeable_configs
 
 
-def write_value(ui, repo, section, key, value, scope=None):
-    if scope == 'local':
-        # easy one
+def write_value(ui, repo, section, key, value, scopes):
+    # may have a choice of files to edit from, start from bottom
+    writeable_configs = get_writeable_configs(ui, repo, scopes)
+    if len(writeable_configs) < 1:
+        ui.warn("no writeable configs to write value to, run 'hg listconfigs'\n")
+        return False
+    if len(writeable_configs) == 1:
         return write_value_to_file(ui, repo, section, key, value,
-            local_rc(repo))
+                writeable_configs[0]['path'])
     else:
-        # we are here because user chose global scope or all scopes
-        # may have a choice of files to edit from, start from bottom
-        configs = get_configs(ui, repo)
-        writeable_configs = get_writeable_configs(ui, repo, scope)
-        if len(writeable_configs) < 1:
-            ui.warn("no writeable configs to write value to, run 'hg listconfigs'\n")
+        # give them a choice
+        choice = get_config_choice(ui, writeable_configs,
+                "multiple config files to choose from, please select:\n",
+                "which file do you want to write to")
+        if choice is False:
+            ui.warn("invalid choice\n")
             return False
-        if len(writeable_configs) == 1:
-            return write_value_to_file(ui, repo, section, key, value,
-                    writeable_configs[0]['path'])
         else:
-            # give them a choice
-            choice = get_config_choice(ui, writeable_configs,
-                    "multiple config files to choose from, please select:\n",
-                    "which file do you want to write to")
-            if choice is False:
-                ui.warn("invalid choice\n")
-                return False
-            else:
-                ui.status("writing value to config [%d]\n" % choice)
-                return write_value_to_file(ui, repo, section, key, value,
-                        writeable_configs[int(choice)]['path'])
+            ui.status("writing value to config [%d]\n" % choice)
+            return write_value_to_file(ui, repo, section, key, value,
+                    writeable_configs[int(choice)]['path'])
 
 
 def write_value_to_file(ui, repo, section, key, value, rcfile):
@@ -240,18 +230,17 @@ def edit_config(ui, repo, **opts):
     If more than one writeable config file is found, you will be prompted
     as to which one you would like to edit.
     """
-    scope = 'local'  # local by default
-    if opts['global']:
-        scope = 'global'
-    if opts['user']:
-        scope = 'user'
+    scopes = set()
     if opts['local']:
-        scope = 'local'
-    if scope == 'local':
-        # easy only one choice
-        return edit_config_file(ui, local_rc(repo))
+        scopes.add('local')
+    if opts['user']:
+        scopes.add('user')
+    if opts['global']:
+        scopes.add('global')
+    if not scopes:
+        scopes.add('local')
 
-    writeable_configs = get_writeable_configs(ui, repo, scope)
+    writeable_configs = get_writeable_configs(ui, repo, scopes)
     if len(writeable_configs) < 1:
         ui.warn("no editable configs to edit, run 'hg listconfigs'\n")
         return False
@@ -301,23 +290,23 @@ def config(ui, repo, key, value=None, **opts):
     section = m.group(1)
     key = m.group(2)
 
-    scope = None
-    if opts['global']:
-        scope = 'global'
-    if opts['user']:
-        scope = 'user'
+    scopes = set()
     if opts['local']:
-        scope = 'local'
+        scopes.add('local')
+    if opts['user']:
+        scopes.add('user')
+    if opts['global']:
+        scopes.add('global')
+    if not scopes:
+        scopes.add('local')
 
     # no value given, we will show them the value
     if value == None:
-        show_value(ui, repo, section, key, scope)
+        show_value(ui, repo, section, key, scopes)
     # try to set a value
     else:
         # for these values, I think it's best to default to local config
-        if scope == None:
-            scope = 'local'
-        write_value(ui, repo, section, key, value, scope)
+        write_value(ui, repo, section, key, value, scopes)
 
 
 cmdtable = {
