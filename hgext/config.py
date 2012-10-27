@@ -52,25 +52,22 @@ def get_configs(ui, repo):
 def list_configs(ui, repo, **opts):
     """List all config files searched for and used by hg
 
-    This command will list all the configuration files searched for by hg in
-    order.  If a config file is present it will be prepended with '*'.  If it
-    is missing it will be prepended with '!'.  If it not writeable by the
-    current users it will be appeneded by '(ro)'.
+    This command lists all the configuration files searched for by hg in
+    order.  Each file name is preceeded by a status indicator: The status
+    is '!' if the configuration file is missing. If the file is writable
+    by the current user the status is 'rw', otherwise 'ro'.
     """
 
     configs = get_configs(ui, repo)
 
     for c in configs:
-        if c['exists']:
-            exists_str = '*'
-            if c['writeable']:
-                writeable_str = ''
-            else:
-                writeable_str = '(ro)'
+        if not c['exists']:
+            status_str = '! '
+        elif c['writeable']:
+            status_str = 'rw'
         else:
-            exists_str = '!'
-            writeable_str = ''
-        ui.status(" %s %s %s\n" % (exists_str, c['path'], writeable_str))
+            status_str = 'ro'
+        ui.status(" %s %s\n" % (status_str, c['path']))
 
 
 def show_value(ui, repo, section, key, scope=None, **opts):
