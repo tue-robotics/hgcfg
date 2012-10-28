@@ -240,7 +240,7 @@ def write_value_to_file(ui, repo, section, key, value, rcfile):
             if section == m.group(1):
                 inside_section = True
                 new += line
-                if not wrote_value:
+                if not wrote_value and value is not None:
                     new += ("%s = %s\n" % (key, value))
                     wrote_value = True
             else:
@@ -258,7 +258,7 @@ def write_value_to_file(ui, repo, section, key, value, rcfile):
                 new += line
     # if we haven't written the value yet it's because we never found the
     # right section, so we'll make it now
-    if not wrote_value:
+    if not wrote_value and value is not None:
         new += "\n[%s]\n%s = %s\n" % (section, key, value)
 
     # write new file
@@ -355,6 +355,14 @@ def config(ui, repo, key='', value=None, **opts):
     section = m.group(1)
     key = m.group(2)
 
+    if opts['delete']:
+        if value is not None:
+            ui.warn('must not specify NEW_VALUE with --delete option')
+            return
+        if not section or not key:
+            ui.warn('must specify SECTION.KEY with --delete option')
+            return
+
     default_get_scopes = set(['local', 'user', 'global'])
     default_set_scopes = set(['local'])
     scopes = set()
@@ -366,7 +374,7 @@ def config(ui, repo, key='', value=None, **opts):
         scopes.add('global')
 
     # no value given, we will show them the value
-    if value == None:
+    if value is None and not opts['delete']:
         show_value(ui, repo, section, key, scopes or default_get_scopes)
     # try to set a value
     else:
@@ -376,7 +384,8 @@ def config(ui, repo, key='', value=None, **opts):
 
 cmdtable = {
         "config": (config,
-            [('l', 'local', None, 'use local config file (default)'),
+            [('d', 'delete', None, 'delete KEY.NAME'),
+             ('l', 'local', None, 'use local config file (default)'),
              ('u', 'user', None, 'use per-user config file(s)'),
              ('g', 'global', None, 'use global config file(s)')],
              "[KEY[.NAME]] [NEW_VALUE]"),
