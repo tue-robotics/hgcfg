@@ -200,7 +200,7 @@ def get_writeable_configs(ui, repo, scopes):
     for c in reversed(configs):
         if c['scope'] not in scopes:
             continue
-        if not c['writeable']:
+        if not c['writeable'] and not c['scope'] == 'local':
             continue
         writeable_configs.append(c)
     return writeable_configs
@@ -234,7 +234,7 @@ def write_value_to_file(ui, repo, section, key, value, rcfile):
     wrote_value = False
     new = ''
 
-    for line in open(rcfile, 'r'):
+    for line in open(rcfile, 'a+'):
         m = re.match("^\s*\[(.*)\]", line)
         if m:
             if section == m.group(1):
@@ -267,7 +267,7 @@ def write_value_to_file(ui, repo, section, key, value, rcfile):
 
 
 def edit_config_file(ui, rc_file):
-    orig_contents = open(rc_file, 'r').read()
+    orig_contents = open(rc_file, 'a+').read()
     contents = "#HG: editing hg config file: %s\n\n%s" % (
         rc_file, orig_contents)
     new_contents = ui.edit(contents, ui.username())
