@@ -10,7 +10,7 @@ Displays or modifies local and global configuration.
 import re
 import os.path
 
-from mercurial import util
+from mercurial import util, commands
 from mercurial.config import config as config_file
 
 if util.version() >= '1.9':
@@ -21,7 +21,9 @@ else:
 
 
 def local_rc(repo):
-    return os.path.join(repo.path, 'hgrc')
+    if repo is None:
+        return []
+    return [os.path.join(repo.path, 'hgrc')]
 
 
 def get_configs(ui, repo):
@@ -29,7 +31,7 @@ def get_configs(ui, repo):
     local_config = local_rc(repo)
     # rcpath() returns a reference to a global list, must not modify
     # it in place by "+=" but instead create a copy by "+".
-    allconfigs = allconfigs + [local_config]
+    allconfigs = allconfigs + local_config
     userconfigs = set(userrcpath())
 
     configs = []
@@ -41,7 +43,7 @@ def get_configs(ui, repo):
             continue
         paths.add(f)
 
-        if f == local_config:
+        if f in local_config:
             scope = 'local'
         elif f in userconfigs:
             scope = 'user'
@@ -382,7 +384,6 @@ def config(ui, repo, key='', value=None, **opts):
         # for these values, I think it's best to default to local config
         write_value(ui, repo, section, key, value, scopes or default_set_scopes)
 
-
 cmdtable = {
         "config": (config,
             [('d', 'delete', None, 'delete KEY.NAME'),
@@ -399,3 +400,4 @@ cmdtable = {
             [],
             "")
         }
+commands.optionalrepo += ' ' + ' '.join(cmdtable.keys())
