@@ -1,4 +1,9 @@
 syntax: glob
 *.pyc
+*.pyo
 .*.swp
+.*.swo
+.*.swn
 pylintrc
+*.backup
+*.orig
