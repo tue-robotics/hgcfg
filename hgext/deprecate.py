@@ -1,3 +1,12 @@
+"""
+Provides some utility function decorators for marking them deprecated and
+replacing them with other names (while preserving the old names).
+
+Copyright 2013 Brian Mearns. You can do whatever you want with it except
+hold me responsible.
+
+"""
+
 import functools
 import warnings
 import sys
@@ -43,9 +52,6 @@ class deprecated(object):
             #Now delegate to the original (deprecated) function.
             return func(*args, **kwargs)
 
-        #Give it a reasonable name.
-        dfunc.__name__ = "_deprecated_" + func.__name__
-
         return dfunc
 
 class replace_deprecated(object):
@@ -55,7 +61,8 @@ class replace_deprecated(object):
 
     def __call__(self, func):
 
-        #Create a function using the old name
+        #Create a function that will use the old name
+        @functools.wraps(func)
         def deprecated_func(*args, **kwargs):
             return func(*args, **kwargs)
         deprecated_func.__name__ = self.old_name
@@ -77,16 +84,26 @@ class replace_deprecated(object):
         return func
 
 
-@replace_deprecated("my_old_func")
-def myoldfunc(x, y, *args, **opts):
-    print "Hello, old friend!", x, y, args, opts
-
 if __name__ == "__main__":
 
+    @replace_deprecated("my_old_func")
+    def myoldfunc(x, y, *args, **opts):
+        """This is my docstring."""
+        print "Hello, friend!", x, y, args, opts
+
+    #To see the deprecation warning:
+    #warnings.simplefilter("always")
 
     print "Invoking preferred funcname..."
     myoldfunc(10, 15, "artichoke", "bedbug", foo="bar", lamb=20)
+    print "Name: " + myoldfunc.__name__
+    print "Doc: " + myoldfunc.__doc__
 
+    print ""
+    print ""
+    print ""
     print "Invoking deprecated funcname..."
     my_old_func(54, 20, "Bananana", trot="burger", fud=None)
+    print "Name: " + my_old_func.__name__
+    print "Doc: " + my_old_func.__doc__
 
