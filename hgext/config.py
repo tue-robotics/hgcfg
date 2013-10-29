@@ -231,7 +231,7 @@ def write_value(ui, repo, section, key, value, scopes):
                     writeable_configs[int(choice)]['path'])
 
 
-def write_value_to_file(ui, repo, section, key, value, rcfile):
+def write_value_to_file_(ui, repo, section, key, value, rcfile, delete):
     inside_section = False
     wrote_value = False
     new = ''
@@ -252,7 +252,7 @@ def write_value_to_file(ui, repo, section, key, value, rcfile):
             if inside_section:
                 m = re.match("\s*" + re.escape(key) + "\s*=(.*)", line)
                 if m:
-                    if not ui.configbool('config', 'delete_on_replace', False):
+                    if not delete:
                         new += ';' + line
                 else:
                     new += line
@@ -266,6 +266,9 @@ def write_value_to_file(ui, repo, section, key, value, rcfile):
     # write new file
     open(rcfile, 'w').write(new)
     return True
+
+def write_value_to_file(ui, repo, section, key, value, rcfile):
+    return write_value_to_file_(ui, repo, section, key, value, rcfile, ui.configbool('config', 'delete_on_replace', False))
 
 
 def edit_config_file(ui, rc_file):
