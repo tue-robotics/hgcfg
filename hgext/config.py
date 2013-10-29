@@ -22,16 +22,17 @@ else:
 
 def local_rc(repo):
     if repo is None:
-        return []
-    return [os.path.join(repo.path, 'hgrc')]
+        return None
+    return os.path.join(repo.path, 'hgrc')
 
 
 def get_configs(ui, repo):
     allconfigs = rcpath()
     local_config = local_rc(repo)
-    # rcpath() returns a reference to a global list, must not modify
-    # it in place by "+=" but instead create a copy by "+".
-    allconfigs = allconfigs + local_config
+    if local_config is not None:
+        # rcpath() returns a reference to a global list, must not modify
+        # it in place by "+=" but instead create a copy by "+".
+        allconfigs = allconfigs + [local_config]
     userconfigs = set(userrcpath())
 
     configs = []
@@ -43,7 +44,7 @@ def get_configs(ui, repo):
             continue
         paths.add(f)
 
-        if f in local_config:
+        if f == local_config:
             scope = 'local'
         elif f in userconfigs:
             scope = 'user'
