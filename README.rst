@@ -8,6 +8,6 @@ files from the command-line.
 
 Three commands are provided by this extension:
 
-- hg showconfigs
+- hg listconfigs
 - hg editconfig
 - hg config
