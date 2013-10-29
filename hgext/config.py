@@ -5,13 +5,17 @@
 
 '''config
 
-Displays or modifies local and global configuration.
+Displays or modifies local, user, and global configuration.
 '''
 import re
 import os.path
+import sys
 
 from mercurial import util, commands
 from mercurial.config import config as config_file
+
+sys.path.append(os.path.dirname(__file__))
+from deprecate import replace_deprecated
 
 if util.version() >= '1.9':
     from mercurial.scmutil import rcpath, userrcpath
@@ -20,13 +24,39 @@ else:
     userrcpath = util.userrcpath
 
 
-def local_rc(repo):
+@replace_deprecated("local_rc")
+def localrc(repo=None):
+    """
+    Return the filesystem path to the repository's hgrc config file
+    as a `str`, or `None` if the given `repo` is None.
+    """
     if repo is None:
         return None
     return os.path.join(repo.path, 'hgrc')
 
+@replace_deprecated("get_configs")
+def getconfigs(ui, repo):
+    """
+    Get a sequence of possible configuration files, including local
+    (repository), user, and global.
 
-def get_configs(ui, repo):
+    Each item in the returned sequence is a dictionary with the following keys:
+
+    `scope`
+        One of 'local', 'user', or 'global'.
+
+    `path`
+        The filesystem path to the config file.
+
+    `exists`
+        A `bool` indicating whether or not the file currently exists on the
+        filesystem.
+
+    `writeable`
+        A `bool` indicating whether or not the file is writeable by the
+        current user.
+            
+    """
     allconfigs = rcpath()
     local_config = local_rc(repo)
     if local_config is not None:
@@ -65,7 +95,8 @@ def get_configs(ui, repo):
     return configs
 
 
-def list_configs(ui, repo, **opts):
+@replace_deprecated("list_configs")
+def listconfigs(ui, repo, **opts):
     """List all config files searched for and used by hg
 
     This command lists all the configuration files searched for by hg in
@@ -86,7 +117,8 @@ def list_configs(ui, repo, **opts):
         ui.status(" %s %-6s %s\n" % (status_str, c['scope'], c['path']))
 
 
-def show_value(ui, repo, section, key, scopes, **opts):
+@replace_deprecated("show_value")
+def showvalue(ui, repo, section, key, scopes, **opts):
     configs = [
         c for c in get_configs(ui, repo)
             if c['scope'] in scopes and c['exists']
@@ -165,7 +197,8 @@ def show_value(ui, repo, section, key, scopes, **opts):
         ui.note('no values found for %s.%s%s\n' % (section, key, scope_str))
 
 
-def get_value(ui, section, key, rcfile):
+@replace_deprecated("get_value")
+def getvalue(ui, section, key, rcfile):
     inside_section = False
     value = None
     for line in open(rcfile, 'r'):
@@ -183,7 +216,8 @@ def get_value(ui, section, key, rcfile):
     return value
 
 
-def get_config_choice(ui, configs, start_msg, prompt_msg, default=0):
+@replace_deprecated("get_config_choice")
+def getconfigchoice(ui, configs, start_msg, prompt_msg, default=0):
     i = 0
     ui.status(start_msg)
     for c in configs:
@@ -197,7 +231,8 @@ def get_config_choice(ui, configs, start_msg, prompt_msg, default=0):
         return choice
 
 
-def get_writeable_configs(ui, repo, scopes):
+@replace_deprecated("get_writeable_configs")
+def getwriteableconfigs(ui, repo, scopes):
     configs = get_configs(ui, repo)
     writeable_configs = []
     for c in reversed(configs):
@@ -209,7 +244,8 @@ def get_writeable_configs(ui, repo, scopes):
     return writeable_configs
 
 
-def write_value(ui, repo, section, key, value, scopes):
+@replace_deprecated("write_value")
+def writevalue(ui, repo, section, key, value, scopes):
     # may have a choice of files to edit from, start from bottom
     writeable_configs = get_writeable_configs(ui, repo, scopes)
     if len(writeable_configs) < 1:
@@ -232,7 +268,9 @@ def write_value(ui, repo, section, key, value, scopes):
                     writeable_configs[int(choice)]['path'])
 
 
-def write_value_to_file_(ui, repo, section, key, value, rcfile, delete):
+
+@replace_deprecated("write_value_to_file_")
+def writevaluetofile_(ui, repo, section, key, value, rcfile, delete):
     inside_section = False
     wrote_value = False
     new = ''
@@ -268,11 +306,13 @@ def write_value_to_file_(ui, repo, section, key, value, rcfile, delete):
     open(rcfile, 'w').write(new)
     return True
 
-def write_value_to_file(ui, repo, section, key, value, rcfile):
+@replace_deprecated("write_value_to_file")
+def writevaluetofile(ui, repo, section, key, value, rcfile):
     return write_value_to_file_(ui, repo, section, key, value, rcfile, ui.configbool('config', 'delete_on_replace', False))
 
 
-def edit_config_file(ui, rc_file):
+@replace_deprecated("edit_config_file")
+def editconfigfile(ui, rcfile):
     orig_contents = open(rc_file, 'a+').read()
     banner = "#HG: editing hg config file: %s\n\n" % rc_file
     contents = banner + orig_contents
@@ -282,7 +322,8 @@ def edit_config_file(ui, rc_file):
         open(rc_file, 'w').write(new_contents)
 
 
-def edit_config(ui, repo, **opts):
+@replace_deprecated("edit_config")
+def editconfig(ui, repo, **opts):
     """Edits your local or global hg configuration file
 
     This command will launch an editor to modify the local .hg/hgrc config
@@ -395,13 +436,15 @@ cmdtable = {
              ('u', 'user', None, 'use per-user config file(s)'),
              ('g', 'global', None, 'use global config file(s)')],
              "[KEY[.NAME]] [NEW_VALUE]"),
-        "editconfig": (edit_config,
+        "editconfig": (editconfig,
             [('l', 'local', None, 'edit local config file (default)'),
              ('u', 'user', None, 'use per-user config file(s)'),
              ('g', 'global', None, 'edit global config file(s)')],
             ""),
-        "listconfigs": (list_configs,
+        "listconfigs": (listconfigs,
             [],
             "")
         }
+
 commands.optionalrepo += ' ' + ' '.join(cmdtable.keys())
+
