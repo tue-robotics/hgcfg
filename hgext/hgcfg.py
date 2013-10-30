@@ -1,8 +1,38 @@
-# Mercurial hgcfg extension
+# Mercurial "hgcfg" extension
 #
-# This software may be used and distributed according to the terms
-# of the GNU General Public License, incorporated herein by reference.
-
+#
+# Copyright 2013 Brian Mearns, Risto Kankkunen, and Alex "alu@zpuppet.org"
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+#
+# This extension is derived from the "config" extension originally written by
+# bitbucket user "alu". That extensions webpage is 
+# <http://mercurial.selenic.com/wiki/ConfigExtensionCommandLine>, and the
+# extension repository is hosted at: <https://bitbucket.org/alu/hgconfig>.
+#
+# The extension was subsequently forked and modified by Risto Kankkunen. This
+# fork is hosted at <https://bitbucket.org/kankri/hgconfig>.
+#
+# The version of the extension you're currently viewing is another fork by Brian
+# Mearns. It incorporates the changes made by Risto Kankkunen up through 2 Dec
+# 2012, revision 6526e84, as well as a number of other changes.
+#
+# This version of the extension is named "hgcfg" and is hosted at
+# <https://bitbucket.org/bmearns/hgconfig>.
+#
 '''hgcfg
 
 Displays or modifies local, user, and global configuration.
