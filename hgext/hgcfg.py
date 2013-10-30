@@ -740,3 +740,5 @@ colortable = {
     'config.keyname':       'bold',
 }
 
+testedwith = '2.7.1'
+
