@@ -1,12 +1,19 @@
-# Mercurial config extension
+# Mercurial hgcfg extension
 #
 # This software may be used and distributed according to the terms
 # of the GNU General Public License, incorporated herein by reference.
 
-'''config
+'''hgcfg
 
 Displays or modifies local, user, and global configuration.
 '''
+
+VERSION = [0, 1, 0, 0, 'dev']
+
+
+##############################################################################
+
+
 import re
 import os.path
 import sys
@@ -23,7 +30,6 @@ if util.version() >= '1.9':
 else:
     rcpath = util.rcpath
     userrcpath = util.userrcpath
-
 
 def hgcmd(func):
     """
