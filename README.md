@@ -1,5 +1,15 @@
 # hgcfg extension for mercurial
 
+Displays or modifies local, user, and global configuration.
+
+## Contents
+
+* [Overview](#markdown-header-overview)
+* [Examples](#markdown-header-examples)
+* [Installation](#markdown-header-installation)
+* [Screen Shots](#markdown-header-screen-shots)
+* [Recent activity](#repo-activity)
+
 ## Overview
 
 This extension provides command-line access to hg configuration values stored
@@ -12,6 +22,18 @@ Three commands are provided by this extension:
 * `hg listcfgs`
 * `hg editcfg`
 * `hg cfg`
+
+### Features
+
+* Set or query config values in local, user, or global hg config files
+* List all items in a given config section
+* List all config files for a repository
+* Launch `EDITOR` to edit local, user, or global config file
+* Delete or comment-out old values when overwriting
+* Colorized when `color` extension is enabled
+* Backwards compatible with "alu"'s
+  [`hgconfig`](https://bitbucket.org/alu/hgconfig) extension (through rev
+  [80f98d6](https://bitbucket.org/alu/hgconfig/commits/80f98d6d3386f8c51d7a89a3a53f4ae9fd4db8a8))
 
 ## Examples
 
@@ -67,5 +89,69 @@ Uses configured editor to edit the specified file, by way of a temp file, like c
      rw local C:\Users\bmearns\.hgext\hgconfig\.hg\hgrc
 
 A `!` indicates the file is not present, `ro` indicates the file is not writeable by the current user, `rw` indicates that it is writeable.
+
+## Installation
+
+To install this extension, download the files in the [hgext](https://bitbucket.org/bmearns/hgcfg/src/tip/hgext) directory to your system
+and edit your hgrc config file to add the `hgcfg.py` file as an extension:
+
+    :::cfg
+    [extensions]
+    hgcfg = /path/to/hgcfg/hgext/hgcfg.py
+
+You can just as well clone the entire [hgext repository][https://bitbucket.org/bmearns/hgcfg] and use it the same way, just make sure to point
+the extension at `hgcfg.py`.
+
+It doesn't matter where you place the files, but a common place to put them is under `~/.hgext` (on Windows, this would be
+`%HOMEDRIVE%%HOMEPATH%\.hgext`, typically `C:\Users\USERNAME\.hgext` in Windows 7).
+
+
+## Screen Shots
+
+The following screen shots show the extension being used in conjuncation with the builting `color` extension, using the default color configuration.
+
+
+### Listing config files
+
+#### `hg listcfgs`
+
+![hg listcfgs](https://bytebucket.org/bmearns/hgcfg/wiki/res/ss_listcfgs.png "Output of 'hg listcfgs' command")
+
+### Querying values
+
+#### `hg cfg ui.username`
+
+![hg cfg ui.username](https://bytebucket.org/bmearns/hgcfg/wiki/res/ss_cfg_ui_username.png "Output of 'hg cfg ui.username' command")
+
+#### `hg cfg ui.username --verbose`
+
+![hg cfg ui.username --verbose](https://bytebucket.org/bmearns/hgcfg/wiki/res/ss_cfg_ui_username_verbose.png "Output of 'hg cfg ui.username --verbose' command")
+
+### Listing all keys in a section
+
+#### `hg cfg ui`
+
+![hg cfg ui](https://bytebucket.org/bmearns/hgcfg/wiki/res/ss_cfg_ui.png "Output of 'hg cfg ui' command")
+
+#### `hg cfg ui --quiet`
+
+![hg cfg ui --quiet](https://bytebucket.org/bmearns/hgcfg/wiki/res/ss_cfg_ui_quiet.png "Output of 'hg cfg ui --quiet' command")
+
+### Edit config file
+
+#### `hg editcfg --user`
+
+![hg editcfg --user](https://bytebucket.org/bmearns/hgcfg/wiki/res/ss_editcfg_user.png "Output of 'hg editcfg --user' command")
+
+### List all sections in all config files
+
+#### `hg cfg`
+
+![hg cfg](https://bytebucket.org/bmearns/hgcfg/wiki/res/ss_cfg.png "Output of 'hg cfg' command")
+
+#### `hg cfg --quiet`
+
+![hg cfg --quiet](https://bytebucket.org/bmearns/hgcfg/wiki/res/ss_cfg_quiet.png "Output of 'hg cfg --quiet' command")
+
 
 
