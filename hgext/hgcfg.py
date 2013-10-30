@@ -1,7 +1,8 @@
 # Mercurial "hgcfg" extension
 #
 #
-# Copyright 2013 Brian Mearns, Risto Kankkunen, and Alex "alu@zpuppet.org"
+# Copyright 2013 Brian Mearns "Maytag Metalark", Risto Kankkunen, and
+# Alex "alu@zpuppet.org"
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -172,7 +173,7 @@ def listcfgs(ui, repo, **opts):
             status_str = 'ro'
             label += ".readonly"
 
-        ui.status(_(" %s %-6s" % (status_str, c['scope'])), label=label)
+        ui.status(_(" %s %-6s " % (status_str, c['scope'])), label=label)
         ui.write(c['path'], label=label)
         ui.write(_("\n"))
 
@@ -733,34 +734,34 @@ colortable = {
 
     ## Files with global scope.
     # In `hg config [SECTION[.KEY]]`
-    'config.file.global'            :   'red bold',
+    'config.file.global'            :   'red',
     # In `hg listconfig`
     'config.file.global.missing'    :   'red ',
     'config.file.global.writeable'  :   'red bold',
     'config.file.global.readonly'   :   'red ',
 
     ## Files with user scope.
-    'config.file.user'            :   'yellow bold',
+    'config.file.user'            :   'yellow',
     'config.file.user.missing'    :   'yellow ',
     'config.file.user.writeable'  :   'yellow bold',
     'config.file.user.readonly'   :   'yellow ',
 
     ## Files with local scope.
-    'config.file.local'            :   'green bold',
+    'config.file.local'            :   'green',
     'config.file.local.missing'    :   'green ',
     'config.file.local.writeable'  :   'green bold',
     'config.file.local.readonly'   :   'green ',
 
     # Scope of a file or value.
-    'config.scope.global':  'red',
-    'config.scope.user':    'yellow',
-    'config.scope.local':   'green',
+    'config.scope.global':  'red bold',
+    'config.scope.user':    'yellow bold',
+    'config.scope.local':   'green bold',
 
     ## A key and it's value
     # The name of the key
-    'config.item.key':      'magenta bold',
+    'config.item.key':      'none',
     # Whatever comes between the name and the value (e.g., '=')
-    'config.item.sep':      'red bold',
+    'config.item.sep':      'none',
     # The value of the key, but not the active value (i.e., it is overriden).
     'config.item.value':    'none',
     # The active value of the key (i.e, not overriden anywhere).
