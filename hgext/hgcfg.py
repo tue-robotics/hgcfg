@@ -472,9 +472,12 @@ def writevaluetofile_(ui, repo, section, key, value, rcfile, delete):
 def writevaluetofile(ui, repo, section, key, value, rcfile):
     """
     Simple delegte to `writevaluetofile_`, but gets the `delete` parameter from
-    the `config.delete_on_replace` configuration value.
+    the `hgcfg.delete_on_replace` configuration value.
     """
-    return writevaluetofile_(ui, repo, section, key, value, rcfile, ui.configbool('config', 'delete_on_replace', False))
+    delete = ui.configbool("hgcfg", "delete_on_replace", None)
+    if delete is None:
+        delete = ui.configbool("config", "delete_on_replace", False)
+    return writevaluetofile_(ui, repo, section, key, value, rcfile, delete)
 
 
 @replace_deprecated("edit_config_file")
@@ -622,7 +625,7 @@ def cfg(ui, repo, key='', value=None, **opts):
 
     By default, the --delete option does not actually remove anything from the
     config file, it simply comments out all occurrences the of specified key
-    in the chosen file. If the "config.delete_on_replace" configuration value is
+    in the chosen file. If the "hgcfg.delete_on_replace" configuration value is
     present and True, then all occurrences of the key will actually be deleted
     from the file. You can put this in an active configuration file, or use the
     --config option to specify it for single use in the current command.
