@@ -1,7 +1,7 @@
 # Mercurial "hgcfg" extension
 #
 #
-# Copyright 2013 Brian Mearns "Maytag Metalark", Risto Kankkunen, and
+# Copyright 2013 Brian Mearns ("Maytag Metalark"), Risto Kankkunen, and
 # Alex "alu@zpuppet.org"
 # 
 # This program is free software: you can redistribute it and/or modify
@@ -204,17 +204,17 @@ def showvalue(ui, repo, section, key, scopes, **opts):
         for c, conf in confs():
             sections.update(conf.sections())
         for s in sorted(sections):
-            ui_writesection(ui, s)
+            uiwritesection(ui, s)
         return
 
     #Similar, but if it's not quiet, then we indicate which file each
     # section comes from, and don't make it unique.
     if section is None:
         for c, conf in confs():
-            ui_writescope(ui, c, ui.status)
-            ui_writefile(ui, c, ui.status)
+            uiwritescope(ui, c, ui.status)
+            uiwritefile(ui, c, ui.status)
             for s in conf.sections():
-                ui_writesection(ui, s)
+                uiwritesection(ui, s)
             ui.status('\n')
         return
 
@@ -223,7 +223,7 @@ def showvalue(ui, repo, section, key, scopes, **opts):
         items = dict()
         for c, conf in confs():
              items.update(conf.items(section))
-        ui_writesection(ui, section)
+        uiwritesection(ui, section)
 
         actvals = {}
         for k, v in sorted(items.iteritems()):
@@ -231,7 +231,7 @@ def showvalue(ui, repo, section, key, scopes, **opts):
                 k.replace(".", ".."))
             if key not in actvals:
                 actvals[key] = ui.config(section, k)
-            ui_writevalue(ui, k, v, c, active = (v == actvals[key]))
+            uiwriteitem(ui, k, v, c, active = (v == actvals[key]))
         ui.write('\n')
         return
 
@@ -240,15 +240,15 @@ def showvalue(ui, repo, section, key, scopes, **opts):
         actvals = {}
         for c, conf in confs():
             if section in conf:
-                ui_writescope(ui, c, ui.status)
-                ui_writefile(ui, c, ui.status)
-                ui_writesection(ui, section, c)
+                uiwritescope(ui, c, ui.status)
+                uiwritefile(ui, c, ui.status)
+                uiwritesection(ui, section, c)
                 for k, v in conf.items(section):
                     key = "%s.%s" % (section.replace(".", ".."),
                         k.replace(".", ".."))
                     if key not in actvals:
                         actvals[key] = ui.config(section, k)
-                    ui_writevalue(ui, k, v, c, active = (v == actvals[key]))
+                    uiwriteitem(ui, k, v, c, active = (v == actvals[key]))
                 ui.status('\n')
         return
 
@@ -659,27 +659,29 @@ def cfg(ui, repo, key='', value=None, **opts):
     return
 
 
-def ui_writescope(ui, config, func=None):
+### Some utility functions for writing to the UI
+
+def uiwritescope(ui, config, func=None):
     if func is None:
         func = ui.write
     func(_('scope=') + ('%s' % config['scope']), label='config.scope.'
         + config['scope'])
     func(_('\n'))
 
-def ui_writefile(ui, config, func=None):
+def uiwritefile(ui, config, func=None):
     if func is None:
         func = ui.write
     func(_('file=') + ('%s' % config['path']), label='config.file.'
         + config['scope'])
     func(_('\n'))
 
-def ui_writesection(ui, section, config=None, func=None):
+def uiwritesection(ui, section, config=None, func=None):
     if func is None:
         func = ui.write
     func('[%s]' % section, label='config.section')
     func(_('\n'))
 
-def ui_writevalue(ui, k, v, config=None, func=None, active=False):
+def uiwriteitem(ui, k, v, config=None, func=None, active=False):
     if func is None:
         func = ui.write
     if active:
@@ -693,6 +695,10 @@ def ui_writevalue(ui, k, v, config=None, func=None, active=False):
     func(v, label="config.item.value" + selected)
     func('\n')
     
+
+
+
+### Extensions Stuff
 
 cmdtable = {
         "cfg": (cfg,
@@ -711,6 +717,7 @@ cmdtable = {
             ""),
         }
 
+### Add the deprecated command aliases.
 for name in ["", "edit", "list"]:
     tail = "cfg"
     otail = "config"
@@ -723,6 +730,7 @@ for name in ["", "edit", "list"]:
     cmddef = list(cmdtable[key])
     cmddef[0] = getattr(sys.modules[__name__], name + otail)
     cmdtable[name + otail] = tuple(cmddef)
+
 
 commands.optionalrepo += ' ' + ' '.join(cmdtable.keys())
 
