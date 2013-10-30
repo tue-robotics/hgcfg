@@ -161,7 +161,7 @@ def listcfgs(ui, repo, **opts):
     configs = getconfigs(ui, repo)
 
     for c in configs:
-        label = "config.file." + c['scope']
+        label = "hgcfg.file." + c['scope']
 
         if not c['exists']:
             status_str = '! '
@@ -274,7 +274,7 @@ def showvalue(ui, repo, section, key, scopes, **opts):
     scope_str = " in %s config" % '/'.join(scopes)
     if len(output) > 0:
         ui.note(_('values found for '))
-        ui.note('%s.%s' % (section, key), label='config.keyname')
+        ui.note('%s.%s' % (section, key), label='hgcfg.keyname')
         ui.note(_(scope_str + ":\n") )
         for o in output:
 
@@ -288,7 +288,7 @@ def showvalue(ui, repo, section, key, scopes, **opts):
                 selected = ''
                 write = ui.status
                 prefix = '  '
-            label = 'config.item.value' + selected
+            label = 'hgcfg.item.value' + selected
             write(prefix, label=label)
             write(o['v'], label=label)
 
@@ -298,20 +298,20 @@ def showvalue(ui, repo, section, key, scopes, **opts):
             #Write the scope and path
             scope = i18nscopes[o['s']]
             ui.note(_('('))
-            ui.note(scope, label='config.scope.' + o['s'])
+            ui.note(scope, label='hgcfg.scope.' + o['s'])
             ui.note(_(')'))
             ui.note('%*s' % (maxscopelen - len(scope) + 1, ''))
-            ui.note(o['p'], label='config.file.' + o['s'])
+            ui.note(o['p'], label='hgcfg.file.' + o['s'])
 
             write("\n")
 
         if not actualfound:
             ui.note(_("\ncurrent active value not in scope ("))
-            ui.note(str(actualval), label='config.item.value.selected')
+            ui.note(str(actualval), label='hgcfg.item.value.selected')
             ui.note(_(")\n"))
     else:
         ui.note(_('no values found for '))
-        ui.note('%s.%s' % (section, key), label='config.keyname')
+        ui.note('%s.%s' % (section, key), label='hgcfg.keyname')
         ui.note(_(scope_str + ":\n") )
 
 
@@ -357,12 +357,18 @@ def getconfigchoice(ui, configs, start_msg, prompt_msg, default=0):
     ui.status(start_msg)
     for c in configs:
         ui.status(_("[%d] " % i))
-        ui.status(c['path'], label='config.file.' + c['scope'])
+        ui.status(c['path'], label='hgcfg.file.' + c['scope'])
         ui.status(_("\n"))
         i += 1
 
-    choice = int(ui.prompt(prompt_msg + _(": [%s]" % (str(default))),
-        default=str(default)))
+    choice = ui.prompt(prompt_msg + _(": [%s]" % (str(default))),
+        default=str(default))
+
+    try:
+        choice = int(choice)
+    except ValueError:
+        return False
+
     if choice < 0 or choice > (len(configs) - 1):
         return False
     else:
@@ -664,21 +670,21 @@ def cfg(ui, repo, key='', value=None, **opts):
 def uiwritescope(ui, config, func=None):
     if func is None:
         func = ui.write
-    func(_('scope=') + ('%s' % config['scope']), label='config.scope.'
+    func(_('scope=') + ('%s' % config['scope']), label='hgcfg.scope.'
         + config['scope'])
     func(_('\n'))
 
 def uiwritefile(ui, config, func=None):
     if func is None:
         func = ui.write
-    func(_('file=') + ('%s' % config['path']), label='config.file.'
+    func(_('file=') + ('%s' % config['path']), label='hgcfg.file.'
         + config['scope'])
     func(_('\n'))
 
 def uiwritesection(ui, section, config=None, func=None):
     if func is None:
         func = ui.write
-    func('[%s]' % section, label='config.section')
+    func('[%s]' % section, label='hgcfg.section')
     func(_('\n'))
 
 def uiwriteitem(ui, k, v, config=None, func=None, active=False):
@@ -690,9 +696,9 @@ def uiwriteitem(ui, k, v, config=None, func=None, active=False):
     else:
         prefix = _('      ')
         selected = ""
-    func(prefix + k, label="config.item.key")
-    func(_(' = '), label="config.item.sep")
-    func(v, label="config.item.value" + selected)
+    func(prefix + k, label="hgcfg.item.key")
+    func(_(' = '), label="hgcfg.item.sep")
+    func(v, label="hgcfg.item.value" + selected)
     func('\n')
     
 
@@ -736,47 +742,47 @@ commands.optionalrepo += ' ' + ' '.join(cmdtable.keys())
 
 colortable = {
     # A section name, like [paths] or [ui].
-    'config.section':       'cyan',
+    'hgcfg.section':       'cyan',
 
     ### Paths to config files.
 
     ## Files with global scope.
     # In `hg config [SECTION[.KEY]]`
-    'config.file.global'            :   'red',
+    'hgcfg.file.global'            :   'red',
     # In `hg listconfig`
-    'config.file.global.missing'    :   'red ',
-    'config.file.global.writeable'  :   'red bold',
-    'config.file.global.readonly'   :   'red ',
+    'hgcfg.file.global.missing'    :   'red ',
+    'hgcfg.file.global.writeable'  :   'red bold',
+    'hgcfg.file.global.readonly'   :   'red ',
 
     ## Files with user scope.
-    'config.file.user'            :   'yellow',
-    'config.file.user.missing'    :   'yellow ',
-    'config.file.user.writeable'  :   'yellow bold',
-    'config.file.user.readonly'   :   'yellow ',
+    'hgcfg.file.user'            :   'yellow',
+    'hgcfg.file.user.missing'    :   'yellow ',
+    'hgcfg.file.user.writeable'  :   'yellow bold',
+    'hgcfg.file.user.readonly'   :   'yellow ',
 
     ## Files with local scope.
-    'config.file.local'            :   'green',
-    'config.file.local.missing'    :   'green ',
-    'config.file.local.writeable'  :   'green bold',
-    'config.file.local.readonly'   :   'green ',
+    'hgcfg.file.local'            :   'green',
+    'hgcfg.file.local.missing'    :   'green ',
+    'hgcfg.file.local.writeable'  :   'green bold',
+    'hgcfg.file.local.readonly'   :   'green ',
 
     # Scope of a file or value.
-    'config.scope.global':  'red bold',
-    'config.scope.user':    'yellow bold',
-    'config.scope.local':   'green bold',
+    'hgcfg.scope.global':  'red bold',
+    'hgcfg.scope.user':    'yellow bold',
+    'hgcfg.scope.local':   'green bold',
 
     ## A key and it's value
     # The name of the key
-    'config.item.key':      'none',
+    'hgcfg.item.key':      'none',
     # Whatever comes between the name and the value (e.g., '=')
-    'config.item.sep':      'none',
+    'hgcfg.item.sep':      'none',
     # The value of the key, but not the active value (i.e., it is overriden).
-    'config.item.value':    'none',
+    'hgcfg.item.value':    'none',
     # The active value of the key (i.e, not overriden anywhere).
-    'config.item.value.selected':    'bold',
+    'hgcfg.item.value.selected':    'bold',
 
     # The key name printed with `hg config SECTION.KEY --verbose`.
-    'config.keyname':       'bold',
+    'hgcfg.keyname':       'bold',
 }
 
 testedwith = '2.7.1'
