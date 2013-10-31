@@ -8,6 +8,7 @@ Displays or modifies local, user, and global configuration.
 * [Examples](#markdown-header-examples)
 * [Installation](#markdown-header-installation)
 * [Screen Shots](#markdown-header-screen-shots)
+* [API](#markdown-header-api)
 * [Similar Extensions](#markdown-header-similar-extensions)
 * [See Also](#markdown-header-see-also)
 * [Recent activity](#repo-activity)
@@ -117,6 +118,30 @@ The following shows the results of issuing the `hg listcfgs` command in conjunct
 For more screen shots, see [ScreenShots](https://bitbucket.org/bmearns/hgcfg/wiki/ScreenShots).
 
 For information on customizing the colors used by the extension, see [Config#Colors](https://bitbucket.org/bmearns/hgcfg/wiki/Config#markdown-header-colors).
+
+
+## API
+
+This extension also provides a basic API that other mercurial extensions can use to poke around and modify
+configuration files, instead of hacking on the text themselves. Although this API is not yet documented well,
+you can take a look at the available functions in [hgcfg.py](https://bitbucket.org/bmearns/hgcfg/src/tip/hgext/hgcfg.py).
+Most of them even have useful docstrings.
+
+To access the API from another extension, use the following python code:
+
+    :::python
+    import mercurial.extensions
+    hgcfg = mercurial.extensions.find('hgcfg')
+    
+The `hgcfg` variable will then hold a `module` object, which you can use just like an imported module. For instance:
+
+    :::python
+    section = "ui"
+    key = "username"
+    value = "newusername"
+    scopes = ["local", "user"]
+    hgcfg.writevalue(ui, repo, section, key, value, scopes)
+
 
 ## Similar Extensions
 
