@@ -8,6 +8,7 @@ Displays or modifies local, user, and global configuration.
 * [Examples](#markdown-header-examples)
 * [Installation](#markdown-header-installation)
 * [Screen Shots](#markdown-header-screen-shots)
+* [See Also](#markdown-header-see-also)
 * [Recent activity](#repo-activity)
 
 ## Overview
@@ -108,50 +109,18 @@ It doesn't matter where you place the files, but a common place to put them is u
 
 ## Screen Shots
 
-The following screen shots show the extension being used in conjuncation with the builting `color` extension, using the default color configuration.
+## Screen Shots
 
-
-### Listing config files
-
-#### `hg listcfgs`
+The following shows the results of issuing the `hg listcfgs` command in conjunction with the built-in `color` extension.
 
 ![hg listcfgs](https://bytebucket.org/bmearns/hgcfg/wiki/res/ss_listcfgs.png "Output of 'hg listcfgs' command")
 
-### Querying values
+For more screen shots, see [ScreenShots](https://bitbucket.org/bmearns/hgcfg/wiki/ScreenShots).
 
-#### `hg cfg ui.username`
+For information on customizing the colors used by the extension, see [Config#Colors](https://bitbucket.org/bmearns/hgcfg/wiki/Config#markdown-header-colors).
 
-![hg cfg ui.username](https://bytebucket.org/bmearns/hgcfg/wiki/res/ss_cfg_ui_username.png "Output of 'hg cfg ui.username' command")
+## See Also
 
-#### `hg cfg ui.username --verbose`
-
-![hg cfg ui.username --verbose](https://bytebucket.org/bmearns/hgcfg/wiki/res/ss_cfg_ui_username_verbose.png "Output of 'hg cfg ui.username --verbose' command")
-
-### Listing all keys in a section
-
-#### `hg cfg ui`
-
-![hg cfg ui](https://bytebucket.org/bmearns/hgcfg/wiki/res/ss_cfg_ui.png "Output of 'hg cfg ui' command")
-
-#### `hg cfg ui --quiet`
-
-![hg cfg ui --quiet](https://bytebucket.org/bmearns/hgcfg/wiki/res/ss_cfg_ui_quiet.png "Output of 'hg cfg ui --quiet' command")
-
-### Edit config file
-
-#### `hg editcfg --user`
-
-![hg editcfg --user](https://bytebucket.org/bmearns/hgcfg/wiki/res/ss_editcfg_user.png "Output of 'hg editcfg --user' command")
-
-### List all sections in all config files
-
-#### `hg cfg`
-
-![hg cfg](https://bytebucket.org/bmearns/hgcfg/wiki/res/ss_cfg.png "Output of 'hg cfg' command")
-
-#### `hg cfg --quiet`
-
-![hg cfg --quiet](https://bytebucket.org/bmearns/hgcfg/wiki/res/ss_cfg_quiet.png "Output of 'hg cfg --quiet' command")
-
-
+* [Config](https://bitbucket.org/bmearns/hgcfg/wiki/Config) - Configuration keys
+* [ScreenShots](https://bitbucket.org/bmearns/hgcfg/wiki/ScreenShots) - More screen shots
 
