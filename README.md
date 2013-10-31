@@ -121,6 +121,7 @@ For information on customizing the colors used by the extension, see [Config#Col
 
 ## See Also
 
+* [Wiki](https://bitbucket.org/bmearns/hgcfg/wiki/) - Extension's public wiki
 * [Config](https://bitbucket.org/bmearns/hgcfg/wiki/Config) - Configuration keys
 * [ScreenShots](https://bitbucket.org/bmearns/hgcfg/wiki/ScreenShots) - More screen shots
 
