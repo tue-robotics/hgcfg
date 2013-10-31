@@ -39,7 +39,7 @@
 Displays or modifies local, user, and global configuration.
 '''
 
-VERSION = [1, 0, 0, 0, '']
+VERSION = [1, 0, 0, 0, 'dev']
 
 
 ##############################################################################
