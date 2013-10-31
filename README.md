@@ -134,6 +134,7 @@ However, this extension hasn't been active since 2007 and is marked on its wiki 
 ## See Also
 
 * [Wiki](https://bitbucket.org/bmearns/hgcfg/wiki/) - Extension's public wiki on BitBucket
+* [HG Extension Page](http://mercurial.selenic.com/wiki/HgcfgExtension) - Extensions' page on mercurial wiki
 * [Config](https://bitbucket.org/bmearns/hgcfg/wiki/Config) - Configuration keys
 * [ScreenShots](https://bitbucket.org/bmearns/hgcfg/wiki/ScreenShots) - More screen shots
 
