@@ -8,6 +8,7 @@ Displays or modifies local, user, and global configuration.
 * [Examples](#markdown-header-examples)
 * [Installation](#markdown-header-installation)
 * [Screen Shots](#markdown-header-screen-shots)
+* [Similar Extensions](#markdown-header-similar-extensions)
 * [See Also](#markdown-header-see-also)
 * [Recent activity](#repo-activity)
 
@@ -109,8 +110,6 @@ It doesn't matter where you place the files, but a common place to put them is u
 
 ## Screen Shots
 
-## Screen Shots
-
 The following shows the results of issuing the `hg listcfgs` command in conjunction with the built-in `color` extension.
 
 ![hg listcfgs](https://bytebucket.org/bmearns/hgcfg/wiki/res/ss_listcfgs.png "Output of 'hg listcfgs' command")
@@ -119,9 +118,22 @@ For more screen shots, see [ScreenShots](https://bitbucket.org/bmearns/hgcfg/wik
 
 For information on customizing the colors used by the extension, see [Config#Colors](https://bitbucket.org/bmearns/hgcfg/wiki/Config#markdown-header-colors).
 
+## Similar Extensions
+
+This extension was originally forked from the [`hgconfig`](http://mercurial.selenic.com/wiki/ConfigExtensionCommandLine)
+extension (frequently just called "config") by BitBucket user "[alu](https://bitbucket.org/alu)".
+Most of the core functionality comes from that extension, but some additional features have been added.
+The `hgcfg` extension retains backwards compatibility with the alu's `hgconfig` extension, so you can
+seamlessly replace that extension with this one.
+
+There is also another but developmentally unrelated extension called
+[`config`](http://mercurial.selenic.com/wiki/ConfigExtension),
+by [Steve Borho](https://bitbucket.org/sborho) which serves many of the same purposes.
+However, this extension hasn't been active since 2007 and is marked on its wiki page as "defunct".
+
 ## See Also
 
-* [Wiki](https://bitbucket.org/bmearns/hgcfg/wiki/) - Extension's public wiki
+* [Wiki](https://bitbucket.org/bmearns/hgcfg/wiki/) - Extension's public wiki on BitBucket
 * [Config](https://bitbucket.org/bmearns/hgcfg/wiki/Config) - Configuration keys
 * [ScreenShots](https://bitbucket.org/bmearns/hgcfg/wiki/ScreenShots) - More screen shots
 
