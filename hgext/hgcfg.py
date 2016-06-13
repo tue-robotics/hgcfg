@@ -39,7 +39,7 @@
 Displays or modifies local, user, and global configuration.
 '''
 
-VERSION = [1, 0, 0, 0, 'dev']
+VERSION = [1, 0, 0, 0, '']
 
 
 ##############################################################################
@@ -49,7 +49,7 @@ import re
 import os.path
 import sys
 
-from mercurial import util, commands
+from mercurial import util, commands, cmdutil
 from mercurial.config import config as config_file
 from mercurial.i18n import _
 
@@ -62,12 +62,8 @@ else:
     rcpath = util.rcpath
     userrcpath = util.userrcpath
 
-def hgcmd(func):
-    """
-    function decorator, but it doesn't do anything, it's just a convenient
-    label.
-    """
-    return func
+cmdtable = {}
+command = cmdutil.command(cmdtable)
 
 @replace_deprecated("local_rc")
 def localrc(repo=None):
@@ -140,7 +136,7 @@ def getconfigs(ui, repo):
     return configs
 
 
-@hgcmd
+#@hgcmd
 @deprecated("Use 'listcfgs' instead")
 @replace_deprecated("list_configs")
 def listconfigs(*args, **kwargs):
@@ -148,7 +144,10 @@ def listconfigs(*args, **kwargs):
     """
     return listcfgs(*args, **kwargs)
 
-@hgcmd
+@command("listcfgs",
+            [],
+            "",
+            optionalrepo=True)
 def listcfgs(ui, repo, **opts):
     """list all config files searched for and used by hg
 
@@ -496,7 +495,7 @@ def editconfigfile(ui, rc_file):
         open(rc_file, 'w').write(new_contents)
 
 
-@hgcmd
+#@hgcmd
 @deprecated("Use 'editcfg' instead")
 @replace_deprecated("edit_config")
 def editconfig(*args, **kwargs):
@@ -504,7 +503,12 @@ def editconfig(*args, **kwargs):
     """
     return listcfgs(*args, **kwargs)
 
-@hgcmd
+@command("editcfg",
+            [('l', 'local', None, 'edit local config file (default)'),
+             ('u', 'user', None, 'use per-user config file(s)'),
+             ('g', 'global', None, 'edit global config file(s)')],
+            "[options]",
+            optionalrepo=True)
 def editcfg(ui, repo, **opts):
     """edits your local or global hg configuration file
 
@@ -549,13 +553,19 @@ def editcfg(ui, repo, **opts):
             return editconfigfile(ui, writeable_configs[int(choice)]['path'])
 
 
-@hgcmd
+#@hgcmd
 @deprecated("Use 'cfg' instead.")
 def config(*args, **kwargs):
     """deprecated alias for `cfg`"""
     return cfg(*args, **kwargs)
     
-@hgcmd
+@command("cfg",
+            [('d', 'delete', None, 'delete SECTION.KEY'),
+             ('l', 'local', None, 'use local config file (default for set)'),
+             ('u', 'user', None, 'use per-user config file(s)'),
+             ('g', 'global', None, 'use global config file(s)')],
+             "[options] [SECTION[.KEY [NEW_VALUE]]]",
+             optionalrepo=True)
 def cfg(ui, repo, key='', value=None, **opts):
     """view or modify a configuration value
 
@@ -709,23 +719,6 @@ def uiwriteitem(ui, k, v, config=None, func=None, active=False):
 
 ### Extensions Stuff
 
-cmdtable = {
-        "cfg": (cfg,
-            [('d', 'delete', None, 'delete SECTION.KEY'),
-             ('l', 'local', None, 'use local config file (default for set)'),
-             ('u', 'user', None, 'use per-user config file(s)'),
-             ('g', 'global', None, 'use global config file(s)')],
-             "[options] [SECTION[.KEY [NEW_VALUE]]]"),
-        "editcfg": (editcfg,
-            [('l', 'local', None, 'edit local config file (default)'),
-             ('u', 'user', None, 'use per-user config file(s)'),
-             ('g', 'global', None, 'edit global config file(s)')],
-            "[options]"),
-        "listcfgs": (listcfgs,
-            [],
-            ""),
-        }
-
 ### Add the deprecated command aliases.
 for name in ["", "edit", "list"]:
     tail = "cfg"
@@ -741,7 +734,7 @@ for name in ["", "edit", "list"]:
     cmdtable[name + otail] = tuple(cmddef)
 
 
-commands.optionalrepo += ' ' + ' '.join(cmdtable.keys())
+#commands.optionalrepo += ' ' + ' '.join(cmdtable.keys())
 
 colortable = {
     # A section name, like [paths] or [ui].
