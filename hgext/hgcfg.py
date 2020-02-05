@@ -40,33 +40,41 @@
 hgcfg
 
 Displays or modifies local, user, and global configuration.
-'''
-
-VERSION = [1, 0, 0, 0, '']
-
-
-##############################################################################
-
+"""
 
 import re
 import os.path
 import sys
 
-from mercurial import util, commands, cmdutil
+from mercurial import util, cmdutil
 from mercurial.config import config as config_file
 from mercurial.i18n import _
 
 sys.path.append(os.path.dirname(__file__))
 from deprecate import replace_deprecated, deprecated
 
-if util.version() >= '1.9':
+if util.version() >= '4.2':
+    from mercurial import rcutil
+    rcpath = rcutil.rccomponents
+    userrcpath = rcutil.userrcpath
+elif util.version() >= '1.9':
     from mercurial.scmutil import rcpath, userrcpath
 else:
     rcpath = util.rcpath
     userrcpath = util.userrcpath
 
+if util.version() >= '4.7':
+    from mercurial.registrar import command
+else:
+    from mercurial.cmdutil import command
+
+
+VERSION = [1, 0, 1, 0, '']
+
+
 cmdtable = {}
-command = cmdutil.command(cmdtable)
+command = command(cmdtable)
+
 
 def localrc(repo=None):
     """
@@ -98,9 +106,9 @@ def getconfigs(ui, repo):
     `writeable`
         A `bool` indicating whether or not the file is writeable by the
         current user.
-            
+
     """
-    allconfigs = rcpath()
+    allconfigs = [c[1] for c in rcpath() if c[0] == 'path']
     local_config = localrc(repo)
     if local_config is not None:
         # rcpath() returns a reference to a global list, must not modify
@@ -754,5 +762,4 @@ colortable = {
     'hgcfg.keyname': 'bold'
 }
 
-testedwith = '2.7.1'
-
+testedwith = '5.3.0'
