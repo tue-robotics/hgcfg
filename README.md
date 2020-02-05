@@ -95,14 +95,14 @@ A `!` indicates the file is not present, `ro` indicates the file is not writeabl
 
 ## Installation
 
-To install this extension, download the files in the [hgext](https://bitbucket.org/bmearns/hgcfg/src/tip/hgext) directory to your system
+To install this extension, download the files in the [hgext](https://github.com/tue-robotics/hgcfg/blob/master/hgext) directory to your system
 and edit your hgrc config file to add the `hgcfg.py` file as an extension:
 
     :::cfg
     [extensions]
     hgcfg = /path/to/hgcfg/hgext/hgcfg.py
 
-You can just as well clone the entire [hgext repository][https://bitbucket.org/bmearns/hgcfg] and use it the same way, just make sure to point
+You can just as well clone the entire [hgcfg repository][https://github.com/tue-robotics/hgcfg] and use it the same way, just make sure to point
 the extension at `hgcfg.py`.
 
 It doesn't matter where you place the files, but a common place to put them is under `~/.hgext` (on Windows, this would be
@@ -113,18 +113,18 @@ It doesn't matter where you place the files, but a common place to put them is u
 
 The following shows the results of issuing the `hg listcfgs` command in conjunction with the built-in `color` extension.
 
-![hg listcfgs](https://bytebucket.org/bmearns/hgcfg/wiki/res/ss_listcfgs.png "Output of 'hg listcfgs' command")
+![hg listcfgs](https://raw.githubusercontent.com/wiki/tue-robotics/hgcfg/res/ss_listcfgs.png "Output of 'hg listcfgs' command")
 
-For more screen shots, see [ScreenShots](https://bitbucket.org/bmearns/hgcfg/wiki/ScreenShots).
+For more screenshots, see [ScreenShots](https://github.com/tue-robotics/hgcfg/wiki/ScreenShots).
 
-For information on customizing the colors used by the extension, see [Config#Colors](https://bitbucket.org/bmearns/hgcfg/wiki/Config#markdown-header-colors).
+For information on customizing the colors used by the extension, see [Config#Colors](https://github.com/tue-robotics/hgcfg/wiki/Config#markdown-header-colors).
 
 
 ## API
 
 This extension also provides a basic API that other mercurial extensions can use to poke around and modify
 configuration files, instead of hacking on the text themselves. Although this API is not yet documented well,
-you can take a look at the available functions in [hgcfg.py](https://bitbucket.org/bmearns/hgcfg/src/tip/hgext/hgcfg.py).
+you can take a look at the available functions in [hgcfg.py](https://github.com/tue-robotics/hgcfg/blob/master/hgext/hgcfg.py).
 Most of them even have useful docstrings.
 
 To access the API from another extension, use the following python code:
@@ -158,8 +158,8 @@ However, this extension hasn't been active since 2007 and is marked on its wiki 
 
 ## See Also
 
-* [Wiki](https://bitbucket.org/bmearns/hgcfg/wiki/) - Extension's public wiki on BitBucket
+* [Wiki](https://github.com/tue-robotics/hgcfg/wiki) - Extension's public wiki on BitBucket
 * [HG Extension Page](http://mercurial.selenic.com/wiki/HgcfgExtension) - Extensions' page on mercurial wiki
-* [Config](https://bitbucket.org/bmearns/hgcfg/wiki/Config) - Configuration keys
-* [ScreenShots](https://bitbucket.org/bmearns/hgcfg/wiki/ScreenShots) - More screen shots
+* [Config](https://github.com/tue-robotics/hgcfg/wiki/Config) - Configuration keys
+* [ScreenShots](https://github.com/tue-robotics/hgcfg/wiki/ScreenShots) - More screen shots
 
