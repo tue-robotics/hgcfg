@@ -27,6 +27,7 @@ import functools
 import warnings
 import sys
 
+
 class deprecated(object):
     """
     A decorator which marks functions as deprecated. It doesn't actually
@@ -45,7 +46,7 @@ class deprecated(object):
 
     def __call__(self, func):
 
-        #Wrap the function in one that issues a deprecation warning
+        # Wrap the function in one that issues a deprecation warning
         @functools.wraps(func)
         def dfunc(*args, **kwargs):
             warning = "Warning: this function is being deprecated: '%s'%s" % (
@@ -65,10 +66,11 @@ class deprecated(object):
                     category=DeprecationWarning,
                 )
 
-            #Now delegate to the original (deprecated) function.
+            # Now delegate to the original (deprecated) function.
             return func(*args, **kwargs)
 
         return dfunc
+
 
 class replace_deprecated(object):
     def __init__(self, old_name, why=None):
@@ -77,13 +79,13 @@ class replace_deprecated(object):
 
     def __call__(self, func):
 
-        #Create a function that will use the old name
+        # Create a function that will use the old name
         @functools.wraps(func)
         def deprecated_func(*args, **kwargs):
             return func(*args, **kwargs)
         deprecated_func.__name__ = self.old_name
 
-        #Now wrap it up in deprecated.
+        # Now wrap it up in deprecated.
         if self.why is None:
             self.why = "Use '%s' instead." % func.__name__
         dep = deprecated(
