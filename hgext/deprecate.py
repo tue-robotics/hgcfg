@@ -21,6 +21,7 @@ replacing them with other names (while preserving the old names).
 Copyright 2013 Brian Mearns. You can do whatever you want with it except
 hold me responsible.
 
+This copy is maintained by tue-robotics
 """
 
 import functools

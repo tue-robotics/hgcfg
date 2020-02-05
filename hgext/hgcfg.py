@@ -27,12 +27,14 @@
 # The extension was subsequently forked and modified by Risto Kankkunen. This
 # fork is hosted at <https://bitbucket.org/kankri/hgconfig>.
 #
-# The version of the extension you're currently viewing is another fork by Brian
-# Mearns. It incorporates the changes made by Risto Kankkunen up through 2 Dec
-# 2012, revision 6526e84, as well as a number of other changes.
+# The version of the extension you're currently viewing is another fork by
+# tue-robotics. It continues on the version of Brian Mearns
+# <https://bitbucket.org/bmearns/hgcfg>. Which incorporates the changes
+# made by Risto Kankkunen up through 2 Dec 2012, revision 6526e84,
+# as well as a number of other changes.
 #
 # This version of the extension is named "hgcfg" and is hosted at
-# <https://bitbucket.org/bmearns/hgconfig>.
+# <https://github.com/tue-robotics/hgcfg>.
 #
 """
 hgcfg
