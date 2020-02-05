@@ -24,6 +24,8 @@ hold me responsible.
 This copy is maintained by tue-robotics
 """
 
+from __future__ import print_function
+
 import functools
 import warnings
 import sys
@@ -95,34 +97,33 @@ class replace_deprecated(object):
         )
         df = dep(deprecated_func)
 
-        #And add that to the global scope.
+        # And add that to the global scope.
         mod = (sys.modules[func.__module__])
         setattr(mod, self.old_name, df)
 
-        #Return the original function, we didn't actually want to modify that.
+        # Return the original function, we didn't actually want to modify that.
         return func
 
 
 if __name__ == "__main__":
-
     @replace_deprecated("my_old_func")
     def myoldfunc(x, y, *args, **opts):
         """This is my docstring."""
-        print "Hello, friend!", x, y, args, opts
+        print("Hello, friend!", x, y, args, opts)
 
-    #To see the deprecation warning:
-    #warnings.simplefilter("always")
+    # To see the deprecation warning:
+    # warnings.simplefilter("always")
 
-    print "Invoking preferred funcname..."
+    print("Invoking preferred funcname...")
     myoldfunc(10, 15, "artichoke", "bedbug", foo="bar", lamb=20)
-    print "Name: " + myoldfunc.__name__
-    print "Doc: " + myoldfunc.__doc__
+    print("Name: " + myoldfunc.__name__)
+    print("Doc: " + myoldfunc.__doc__)
 
-    print ""
-    print ""
-    print ""
-    print "Invoking deprecated funcname..."
+    print("")
+    print("")
+    print("")
+    print("Invoking deprecated funcname...")
     my_old_func(54, 20, "Bananana", trot="burger", fud=None)
-    print "Name: " + my_old_func.__name__
-    print "Doc: " + my_old_func.__doc__
+    print("Name: " + my_old_func.__name__)
+    print("Doc: " + my_old_func.__doc__)
 
