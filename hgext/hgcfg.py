@@ -108,7 +108,12 @@ def getconfigs(ui, repo):
         current user.
 
     """
-    allconfigs = [c[1] for c in rcpath() if c[0] == 'path']
+    allconfigs = rcpath()
+    # From 4.2 rcpath(rcutil.rccomponents) returns a tuple
+    # Not checking here on isinstance, If return type changes, this will probably break instead of silently ignoring
+    # this and treating the output as a string like before 4.2.
+    if util.version() >= '4.2':
+        allconfigs = [c[1] for c in allconfigs if c[0] == 'path']
     local_config = localrc(repo)
     if local_config is not None:
         # rcpath() returns a reference to a global list, must not modify
