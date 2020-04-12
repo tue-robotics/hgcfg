@@ -30,6 +30,11 @@ import functools
 import warnings
 import sys
 
+if sys.version_info.major == 2:
+    func_code_attr = 'func_code'
+else:
+    func_code_attr = '__code__'
+
 
 class deprecated(object):
     """
@@ -88,12 +93,14 @@ class replace_deprecated(object):
             return func(*args, **kwargs)
         deprecated_func.__name__ = self.old_name
 
+        func_code = getattr(func, func_code_attr)
+
         # Now wrap it up in deprecated.
         if self.why is None:
             self.why = "Use '%s' instead." % func.__name__
         dep = deprecated(
-            self.why, func.func_code.co_filename,
-            func.func_code.co_firstlineno + 1
+            self.why, func_code.co_filename,
+            func_code.co_firstlineno + 1
         )
         df = dep(deprecated_func)
 

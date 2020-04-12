@@ -53,23 +53,23 @@ from mercurial.i18n import _
 sys.path.append(os.path.dirname(__file__))
 from deprecate import replace_deprecated, deprecated
 
-if util.version() >= '4.2':
+if util.version() >= b'4.2':
     from mercurial import rcutil
     rcpath = rcutil.rccomponents
     userrcpath = rcutil.userrcpath
-elif util.version() >= '1.9':
+elif util.version() >= b'1.9':
     from mercurial.scmutil import rcpath, userrcpath
 else:
     rcpath = util.rcpath
     userrcpath = util.userrcpath
 
-if util.version() >= '4.7':
+if util.version() >= b'4.7':
     from mercurial.registrar import command
 else:
     from mercurial.cmdutil import command
 
 
-VERSION = [1, 0, 1, 0, '']
+VERSION = [1, 0, 2, 0, b'']
 
 
 cmdtable = {}
@@ -83,7 +83,7 @@ def localrc(repo=None):
     """
     if repo is None:
         return None
-    return os.path.join(repo.path, 'hgrc')
+    return os.path.join(repo.path, b'hgrc')
 
 
 def getconfigs(ui, repo):
@@ -112,8 +112,8 @@ def getconfigs(ui, repo):
     # From 4.2 rcpath(rcutil.rccomponents) returns a tuple
     # Not checking here on isinstance, If return type changes, this will probably break instead of silently ignoring
     # this and treating the output as a string like before 4.2.
-    if util.version() >= '4.2':
-        allconfigs = [c[1] for c in allconfigs if c[0] == 'path']
+    if util.version() >= b'4.2':
+        allconfigs = [c[1] for c in allconfigs if c[0] == b'path']
     local_config = localrc(repo)
     if local_config is not None:
         # rcpath() returns a reference to a global list, must not modify
@@ -131,11 +131,11 @@ def getconfigs(ui, repo):
         paths.add(f)
 
         if f == local_config:
-            scope = 'local'
+            scope = b'local'
         elif f in userconfigs:
-            scope = 'user'
+            scope = b'user'
         else:
-            scope = 'global'
+            scope = b'global'
         if not os.path.exists(f):
             exists = False
             writeable = False
@@ -145,16 +145,16 @@ def getconfigs(ui, repo):
                 writeable = True
             else:
                 writeable = False
-        configs.append({'scope': scope, 'path': f, 'exists': exists,
-            'writeable': writeable})
+        configs.append({b'scope': scope, b'path': f, b'exists': exists,
+                        b'writeable': writeable})
 
     return configs
 
 
-@replace_deprecated("listconfigs")
-@command("listcfgs",
+@replace_deprecated("listconfigs")  # Don't use bytestring
+@command(b"listcfgs",
          [],
-         "",
+         b"",
          optionalrepo=True)
 def listcfgs(ui, repo, **opts):
     """list all config files searched for and used by hg
@@ -168,21 +168,21 @@ def listcfgs(ui, repo, **opts):
     configs = getconfigs(ui, repo)
 
     for c in configs:
-        label = "hgcfg.file." + c['scope']
+        label = b"hgcfg.file." + c[b'scope']
 
-        if not c['exists']:
-            status_str = '! '
-            label += ".missing"
-        elif c['writeable']:
-            status_str = 'rw'
-            label += ".writeable"
+        if not c[b'exists']:
+            status_str = b'! '
+            label += b".missing"
+        elif c[b'writeable']:
+            status_str = b'rw'
+            label += b".writeable"
         else:
-            status_str = 'ro'
-            label += ".readonly"
+            status_str = b'ro'
+            label += b".readonly"
 
-        ui.status(_(" %s %-6s " % (status_str, c['scope'])), label=label)
-        ui.write(c['path'], label=label)
-        ui.write(_("\n"))
+        ui.status(_(b" %s %-6s " % (status_str, c[b'scope'])), label=label)
+        ui.write(c[b'path'], label=label)
+        ui.write(_(b"\n"))
 
 
 def showvalue(ui, repo, section, key, scopes, **opts):
@@ -193,12 +193,12 @@ def showvalue(ui, repo, section, key, scopes, **opts):
     """
 
     # Get a list of config files which exist and are in scope.
-    configs = [c for c in getconfigs(ui, repo) if c['scope'] in scopes and c['exists']]
+    configs = [c for c in getconfigs(ui, repo) if c[b'scope'] in scopes and c[b'exists']]
 
     def confs():
         for c in configs:
             conf = config_file()
-            conf.read(c['path'])
+            conf.read(c[b'path'])
             yield c, conf
 
     # If it's quiet, then we aren't indicating which file it came from,
@@ -219,7 +219,7 @@ def showvalue(ui, repo, section, key, scopes, **opts):
             uiwritefile(ui, c, ui.status)
             for s in conf.sections():
                 uiwritesection(ui, s)
-            ui.status('\n')
+            ui.status(b'\n')
         return
 
     # List all unique items in the named section
@@ -231,12 +231,12 @@ def showvalue(ui, repo, section, key, scopes, **opts):
 
         actvals = {}
         for k, v in sorted(items.iteritems()):
-            key = "%s.%s" % (section.replace(".", ".."),
-                k.replace(".", ".."))
+            key = b"%s.%s" % (section.replace(b".", b".."),
+                              k.replace(b".", b".."))
             if key not in actvals:
                 actvals[key] = ui.config(section, k)
-            uiwriteitem(ui, k, v, c, active = (v == actvals[key]))
-        ui.write('\n')
+            uiwriteitem(ui, k, v, c, active=(v == actvals[key]))
+        ui.write(b'\n')
         return
 
     # Same, but if not quiet, don't make it unique.
@@ -248,21 +248,21 @@ def showvalue(ui, repo, section, key, scopes, **opts):
                 uiwritefile(ui, c, ui.status)
                 uiwritesection(ui, section, c)
                 for k, v in conf.items(section):
-                    key = "%s.%s" % (section.replace(".", ".."),
-                        k.replace(".", ".."))
+                    key = b"%s.%s" % (section.replace(b".", b".."),
+                                      k.replace(b".", b".."))
                     if key not in actvals:
                         actvals[key] = ui.config(section, k)
-                    uiwriteitem(ui, k, v, c, active = (v == actvals[key]))
-                ui.status('\n')
+                    uiwriteitem(ui, k, v, c, active=(v == actvals[key]))
+                ui.status(b'\n')
         return
 
     # They specified both a section and a key, so find all values of it.
     output = []
     max_value_len = 0
     for c in configs:
-        value = getvalue(ui, section, key, c['path'])
+        value = getvalue(ui, section, key, c[b'path'])
         if value is not None:
-            output.append({'p': c['path'], 'v': value, 's': c['scope']})
+            output.append({b'p': c[b'path'], b'v': value, b's': c[b'scope']})
             max_value_len = max([max_value_len, len(value)])
 
     maxscopelen = 0
@@ -275,48 +275,48 @@ def showvalue(ui, repo, section, key, scopes, **opts):
     actualval = ui.config(section, key)
     actualfound = False
 
-    scope_str = " in %s config" % '/'.join(scopes)
+    scope_str = b" in %s config" % b'/'.join(scopes)
     if len(output) > 0:
-        ui.note(_('values found for '))
-        ui.note('%s.%s' % (section, key), label='hgcfg.keyname')
-        ui.note(_(scope_str + ":\n") )
+        ui.note(_(b'values found for '))
+        ui.note(b'%s.%s' % (section, key), label=b'hgcfg.keyname')
+        ui.note(_(scope_str + b":\n"))
         for o in output:
 
             # Fore --quiet, only show the correct value.
-            if o['v'] == actualval:
-                selected = '.selected'
+            if o[b'v'] == actualval:
+                selected = b'.selected'
                 write = ui.write
-                prefix = '* '
+                prefix = b'* '
                 actualfound = True
             else:
-                selected = ''
+                selected = b''
                 write = ui.status
-                prefix = '  '
-            label = 'hgcfg.item.value' + selected
+                prefix = b'  '
+            label = b'hgcfg.item.value' + selected
             write(prefix, label=label)
-            write(o['v'], label=label)
+            write(o[b'v'], label=label)
 
             # Fill space before writing the scope and path.
-            ui.note('%*s' % (max_value_len - len(o['v']) + 2, ''))
+            ui.note(b'%*s' % (max_value_len - len(o[b'v']) + 2, b''))
 
             # Write the scope and path
-            scope = i18nscopes[o['s']]
-            ui.note(_('('))
-            ui.note(scope, label='hgcfg.scope.' + o['s'])
-            ui.note(_(')'))
-            ui.note('%*s' % (maxscopelen - len(scope) + 1, ''))
-            ui.note(o['p'], label='hgcfg.file.' + o['s'])
+            scope = i18nscopes[o[b's']]
+            ui.note(_(b'('))
+            ui.note(scope, label=b'hgcfg.scope.' + o[b's'])
+            ui.note(_(b')'))
+            ui.note(b'%*s' % (maxscopelen - len(scope) + 1, b''))
+            ui.note(o[b'p'], label=b'hgcfg.file.' + o[b's'])
 
-            write("\n")
+            write(b"\n")
 
         if not actualfound:
-            ui.note(_("\ncurrent active value not in scope ("))
-            ui.note(str(actualval), label='hgcfg.item.value.selected')
-            ui.note(_(")\n"))
+            ui.note(_(b"\ncurrent active value not in scope ("))
+            ui.note(str(actualval), label=b'hgcfg.item.value.selected')
+            ui.note(_(b")\n"))
     else:
-        ui.note(_('no values found for '))
-        ui.note('%s.%s' % (section, key), label='hgcfg.keyname')
-        ui.note(_(scope_str + ":\n") )
+        ui.note(_(b'no values found for '))
+        ui.note(b'%s.%s' % (section, key), label=b'hgcfg.keyname')
+        ui.note(_(scope_str + b":\n"))
 
 
 def getvalue(ui, section, key, rcfile):
@@ -336,18 +336,16 @@ def getvalues(ui, section, key, rcfile):
     """
     inside_section = False
     values = []
-    for line in open(rcfile, 'r'):
-        m = re.match("^\s*\[(.*)\]", line)
-        if m:
-            if section == m.group(1):
-                inside_section = True
+    with open(rcfile, 'rb') as f:
+        for line in f:
+            m = re.match(br"^\s*\[(.*)\]", line)
+            if m:
+                inside_section = section == m.group(1)
             else:
-                inside_section = False
-        else:
-            if inside_section:
-                m = re.match("\s*" + re.escape(key) + "\s*=(.*)", line)
-                if m:
-                    values.append(m.group(1).strip())
+                if inside_section:
+                    m = re.match(br"\s*" + re.escape(key) + br"\s*=(.*)", line)
+                    if m:
+                        values.append(m.group(1).strip())
     return values
 
 
@@ -359,13 +357,13 @@ def getconfigchoice(ui, configs, start_msg, prompt_msg, default=0):
     i = 0
     ui.status(start_msg)
     for c in configs:
-        ui.status(_("[%d] " % i))
-        ui.status(c['path'], label='hgcfg.file.' + c['scope'])
-        ui.status(_("\n"))
+        ui.status(_(b"[%d] " % i))
+        ui.status(c[b'path'], label=b'hgcfg.file.' + c[b'scope'])
+        ui.status(_(b"\n"))
         i += 1
 
-    choice = ui.prompt(prompt_msg + _(": [%s]" % (str(default))),
-        default=str(default))
+    choice = ui.prompt(prompt_msg + _(b": [%s]" % (bytes(default))),
+                       default=bytes(default))
 
     try:
         choice = int(choice)
@@ -389,9 +387,9 @@ def getwriteableconfigs(ui, repo, scopes):
     configs = getconfigs(ui, repo)
     writeable_configs = []
     for c in reversed(configs):
-        if c['scope'] not in scopes:
+        if c[b'scope'] not in scopes:
             continue
-        if not c['writeable'] and not c['scope'] == 'local':
+        if not c[b'writeable'] and not c[b'scope'] == b'local':
             continue
         writeable_configs.append(c)
     return writeable_configs
@@ -402,25 +400,25 @@ def writevalue(ui, repo, section, key, value, scopes):
     # may have a choice of files to edit from, start from bottom
     writeable_configs = getwriteableconfigs(ui, repo, scopes)
     if len(writeable_configs) < 1:
-        ui.warn(_("no writeable configs to write value to, "
-            "try 'hg listconfigs'\n"))
+        ui.warn(_(b"no writeable configs to write value to, "
+                  b"try 'hg listconfigs'\n"))
         return False
 
     if len(writeable_configs) == 1:
         return writevaluetofile(ui, repo, section, key, value,
-            writeable_configs[0]['path'])
+                                writeable_configs[0][b'path'])
     else:
         # give them a choice
         choice = getconfigchoice(ui, writeable_configs,
-            _("multiple config files to choose from, please select:\n"),
-            _("which file do you want to write to"))
+                                 _(b"multiple config files to choose from, please select:\n"),
+                                 _(b"which file do you want to write to"))
         if choice is False:
-            ui.warn(_("invalid choice\n"))
+            ui.warn(_(b"invalid choice\n"))
             return False
         else:
-            ui.status(_("writing value to config [%d]\n" % choice))
+            ui.status(_(b"writing value to config [%d]\n" % choice))
             return writevaluetofile(ui, repo, section, key, value,
-                writeable_configs[int(choice)]['path'])
+                                    writeable_configs[int(choice)][b'path'])
 
 
 def writevaluetofile_(ui, repo, section, key, value, rcfile, delete):
@@ -433,38 +431,40 @@ def writevaluetofile_(ui, repo, section, key, value, rcfile, delete):
 
     inside_section = False
     wrote_value = False
-    new = ''
+    new = b''
 
-    for line in open(rcfile, 'a+'):
-        m = re.match("^\s*\[(.*)\]", line)
-        if m:
-            if section == m.group(1):
-                inside_section = True
-                new += line
-                if not wrote_value and value is not None:
-                    new += ("%s = %s\n" % (key, value))
-                    wrote_value = True
-            else:
-                inside_section = False
-                new += line
-        else:
-            if inside_section:
-                m = re.match("\s*" + re.escape(key) + "\s*=(.*)", line)
-                if m:
-                    if not delete:
-                        new += ';' + line
+    with open(rcfile, 'rb') as f:
+        for line in f:
+            m = re.match(br"^\s*\[(.*)\]", line)
+            if m:
+                if section == m.group(1):
+                    inside_section = True
+                    new += line
+                    if not wrote_value and value is not None:
+                        new += (b"%s = %s\n" % (key, value))
+                        wrote_value = True
                 else:
+                    inside_section = False
                     new += line
             else:
-                new += line
+                if inside_section:
+                    m = re.match(br"\s*" + re.escape(key) + br"\s*=(.*)", line)
+                    if m:
+                        if not delete:
+                            new += b';' + line
+                    else:
+                        new += line
+                else:
+                    new += line
 
     # if we haven't written the value yet it's because we never found the
     # right section, so we'll make it now
     if not wrote_value and value is not None:
-        new += "\n[%s]\n%s = %s\n" % (section, key, value)
+        new += b"\n[%s]\n%s = %s\n" % (section, key, value)
 
     # write new file
-    open(rcfile, 'w').write(new)
+    with open(rcfile, 'wb') as f:
+        f.write(new)
     return True
 
 
@@ -473,9 +473,9 @@ def writevaluetofile(ui, repo, section, key, value, rcfile):
     Simple delegte to `writevaluetofile_`, but gets the `delete` parameter from
     the `hgcfg.delete_on_replace` configuration value.
     """
-    delete = ui.configbool("hgcfg", "delete_on_replace", None)
+    delete = ui.configbool(b"hgcfg", b"delete_on_replace", None)
     if delete is None:
-        delete = ui.configbool("config", "delete_on_replace", False)
+        delete = ui.configbool(b"config", b"delete_on_replace", False)
     return writevaluetofile_(ui, repo, section, key, value, rcfile, delete)
 
 
@@ -485,21 +485,25 @@ def editconfigfile(ui, rc_file):
     `ui.edit` function, similar to the one used for editing commit
     messages.
     """
-    orig_contents = open(rc_file, 'a+').read()
-    banner = _("#HG: editing hg config file: ") + rc_file + _("\n\n")
+    with open(rc_file, 'rb') as f:
+        orig_contents = f.read()
+
+    banner = _(b"#HG: editing hg config file: ") + rc_file + _(b"\n\n")
     contents = banner + orig_contents
     new_contents = ui.edit(contents, ui.username())
-    new_contents = re.sub(r'^%s' % re.escape(banner), '', new_contents)
+    new_contents = re.sub(br'^%s' % re.escape(banner), b'', new_contents)
+
     if new_contents != orig_contents:
-        open(rc_file, 'w').write(new_contents)
+        with open(rc_file, 'wb') as f:
+            f.write(new_contents)
 
 
-@replace_deprecated("editconfig")
-@command("editcfg",
-         [('l', 'local', None, 'edit local config file (default)'),
-          ('u', 'user', None, 'edit per-user config file(s)'),
-          ('g', 'global', None, 'edit global config file(s)')],
-         "[options]",
+@replace_deprecated("editconfig")  # Don't use bytestring
+@command(b"editcfg",
+         [(b'l', b'local', None, b'edit local config file (default)'),
+          (b'u', b'user', None, b'edit per-user config file(s)'),
+          (b'g', b'global', None, b'edit global config file(s)')],
+         b"[options]",
          optionalrepo=True)
 def editcfg(ui, repo, **opts):
     """edits your local or global hg configuration file
@@ -515,45 +519,45 @@ def editcfg(ui, repo, **opts):
     as to which one you would like to edit.
     """
     scopes = set()
-    if opts['local']:
-        scopes.add('local')
-    if opts['user']:
-        scopes.add('user')
-    if opts['global']:
-        scopes.add('global')
+    if opts['local']:  # Don't use bytestring
+        scopes.add(b'local')
+    if opts['user']:  # Don't use bytestring
+        scopes.add(b'user')
+    if opts['global']:  # Don't use bytestring
+        scopes.add(b'global')
     if not scopes:
-        scopes.add('local')
+        scopes.add(b'local')
 
     writeable_configs = getwriteableconfigs(ui, repo, scopes)
     if len(writeable_configs) < 1:
-        ui.warn(_("no writeable configs to write value to, "
-            "try 'hg listconfigs'\n"))
+        ui.warn(_(b"no writeable configs to write value to, "
+                  b"try 'hg listconfigs'\n"))
         return False
 
     if len(writeable_configs) == 1:
-        return editconfigfile(ui, writeable_configs[0]['path'])
+        return editconfigfile(ui, writeable_configs[0][b'path'])
     else:
         # give them a choice
         choice = getconfigchoice(ui, writeable_configs,
-            _("multiple config files to choose from, please select:\n"),
-            _("which file do you want to edit"))
+            _(b"multiple config files to choose from, please select:\n"),
+            _(b"which file do you want to edit"))
         if choice is False:
-            ui.warn("invalid choice\n")
+            ui.warn(b"invalid choice\n")
             return False
         else:
-            ui.status(_("editing config file [%d]\n") % choice)
-            return editconfigfile(ui, writeable_configs[int(choice)]['path'])
+            ui.status(_(b"editing config file [%d]\n") % choice)
+            return editconfigfile(ui, writeable_configs[int(choice)][b'path'])
 
 
-@replace_deprecated('config')
-@command("cfg",
-         [('d', 'delete', None, 'delete SECTION.KEY'),
-          ('l', 'local', None, 'use local config file (default for set)'),
-          ('u', 'user', None, 'use per-user config file(s)'),
-          ('g', 'global', None, 'use global config file(s)')],
-         "[options] [SECTION[.KEY [NEW_VALUE]]]",
+@replace_deprecated('config')  # Don't use bytestring
+@command(b"cfg",
+         [(b'd', b'delete', None, b'delete SECTION.KEY'),
+          (b'l', b'local', None, b'use local config file (default for set)'),
+          (b'u', b'user', None, b'use per-user config file(s)'),
+          (b'g', b'global', None, b'use global config file(s)')],
+         b"[options] [SECTION[.KEY [NEW_VALUE]]]",
          optionalrepo=True)
-def cfg(ui, repo, key='', value=None, **opts):
+def cfg(ui, repo, key=b'', value=None, **opts):
     """view or modify a configuration value
 
     To view all configuration sections across all files:
@@ -628,34 +632,34 @@ def cfg(ui, repo, key='', value=None, **opts):
     --config option to specify it for single use in the current command.
 
     """
-    pattern = r"(?:([a-z_][a-z0-9_-]*)(?:\.([a-z_][a-z0-9._-]*))?)?$"
+    pattern = br"(?:([a-z_][a-z0-9_-]*)(?:\.([a-z_][a-z0-9._-]*))?)?$"
     m = re.match(pattern, key, re.I)
     if not m:
-        ui.warn(_("invalid key syntax. try SECTION.KEY\n"))
+        ui.warn(_(b"invalid key syntax. try SECTION.KEY\n"))
         return
     section = m.group(1)
     key = m.group(2)
 
-    if opts['delete']:
+    if opts['delete']:  # Don't use bytestring
         if value is not None:
-            ui.warn(_('must not specify NEW_VALUE with --delete option'))
+            ui.warn(_(b'must not specify NEW_VALUE with --delete option'))
             return
         if not section or not key:
-            ui.warn(_('must specify SECTION.KEY with --delete option'))
+            ui.warn(_(b'must specify SECTION.KEY with --delete option'))
             return
 
-    default_get_scopes = {'local', 'user', 'global'}
-    default_set_scopes = {'local'}
+    default_get_scopes = {b'local', b'user', b'global'}
+    default_set_scopes = {b'local'}
     scopes = set()
-    if opts['local']:
-        scopes.add('local')
-    if opts['user']:
-        scopes.add('user')
-    if opts['global']:
-        scopes.add('global')
+    if opts['local']:  # Don't use bytestring
+        scopes.add(b'local')
+    if opts['user']:  # Don't use bytestring
+        scopes.add(b'user')
+    if opts['global']:  # Don't use bytestring
+        scopes.add(b'global')
 
     # no value given, we will show them the value
-    if value is None and not opts['delete']:
+    if value is None and not opts['delete']:  # Don't use bytestring
         showvalue(ui, repo, section, key, scopes or default_get_scopes)
     # try to set a value
     else:
@@ -670,101 +674,99 @@ def cfg(ui, repo, key='', value=None, **opts):
 def uiwritescope(ui, config, func=None):
     if func is None:
         func = ui.write
-    func(_('scope=') + ('%s' % config['scope']), label='hgcfg.scope.'
-        + config['scope'])
-    func(_('\n'))
+    func(_(b'scope=') + (b'%s' % config[b'scope']), label=b'hgcfg.scope.' + config[b'scope'])
+    func(_(b'\n'))
 
 
 def uiwritefile(ui, config, func=None):
     if func is None:
         func = ui.write
-    func(_('file=') + ('%s' % config['path']), label='hgcfg.file.'
-        + config['scope'])
-    func(_('\n'))
+    func(_(b'file=') + (b'%s' % config[b'path']), label=b'hgcfg.file.' + config[b'scope'])
+    func(_(b'\n'))
 
 
 def uiwritesection(ui, section, config=None, func=None):
     if func is None:
         func = ui.write
-    func('[%s]' % section, label='hgcfg.section')
-    func(_('\n'))
+    func(b'[%s]' % section, label=b'hgcfg.section')
+    func(_(b'\n'))
 
 
 def uiwriteitem(ui, k, v, config=None, func=None, active=False):
     if func is None:
         func = ui.write
     if active:
-        prefix = _('    * ')
-        selected = ".selected"
+        prefix = _(b'    * ')
+        selected = b".selected"
     else:
-        prefix = _('      ')
-        selected = ""
-    func(prefix + k, label="hgcfg.item.key")
-    func(_(' = '), label="hgcfg.item.sep")
-    func(v, label="hgcfg.item.value" + selected)
-    func('\n')
+        prefix = _(b'      ')
+        selected = b""
+    func(prefix + k, label=b"hgcfg.item.key")
+    func(_(b' = '), label=b"hgcfg.item.sep")
+    func(v, label=b"hgcfg.item.value" + selected)
+    func(b'\n')
 
 
 # Extensions Stuff
 
 # Add the deprecated command aliases.
-for name in ["", "edit", "list"]:
-    tail = "cfg"
-    otail = "config"
+for name in [b"", b"edit", b"list"]:
+    tail = b"cfg"
+    otail = b"config"
     key = name + tail
     if key not in cmdtable:
-        tail += "s"
-        otail += "s"
+        tail += b"s"
+        otail += b"s"
         key = name + tail
 
     cmddef = list(cmdtable[key])
-    cmddef[0] = getattr(sys.modules[__name__], name + otail)
+    cmddef[0] = getattr(sys.modules[__name__], (name + otail).decode('ascii'))
     cmdtable[name + otail] = tuple(cmddef)
 
 # colors
 colortable = {
     # A section name, like [paths] or [ui].
-    'hgcfg.section': 'cyan',
+    b'hgcfg.section': b'cyan',
 
     # Paths to config files.
 
     # Files with global scope.
     # In `hg config [SECTION[.KEY]]`
-    'hgcfg.file.global': 'red',
+    b'hgcfg.file.global': b'red',
     # In `hg listconfig`
-    'hgcfg.file.global.missing': 'red ',
-    'hgcfg.file.global.writeable': 'red bold',
-    'hgcfg.file.global.readonly': 'red ',
+    b'hgcfg.file.global.missing': b'red ',
+    b'hgcfg.file.global.writeable': b'red bold',
+    b'hgcfg.file.global.readonly': b'red ',
 
     # Files with user scope.
-    'hgcfg.file.user': 'yellow',
-    'hgcfg.file.user.missing': 'yellow ',
-    'hgcfg.file.user.writeable': 'yellow bold',
-    'hgcfg.file.user.readonly': 'yellow ',
+    b'hgcfg.file.user': b'yellow',
+    b'hgcfg.file.user.missing': b'yellow ',
+    b'hgcfg.file.user.writeable': b'yellow bold',
+    b'hgcfg.file.user.readonly': b'yellow ',
 
     # Files with local scope.
-    'hgcfg.file.local': 'green',
-    'hgcfg.file.local.missing': 'green ',
-    'hgcfg.file.local.writeable': 'green bold',
-    'hgcfg.file.local.readonly': 'green ',
+    b'hgcfg.file.local': b'green',
+    b'hgcfg.file.local.missing': b'green ',
+    b'hgcfg.file.local.writeable': b'green bold',
+    b'hgcfg.file.local.readonly': b'green ',
 
     # Scope of a file or value.
-    'hgcfg.scope.global': 'red bold',
-    'hgcfg.scope.user': 'yellow bold',
-    'hgcfg.scope.local': 'green bold',
+    b'hgcfg.scope.global': b'red bold',
+    b'hgcfg.scope.user': b'yellow bold',
+    b'hgcfg.scope.local': b'green bold',
 
     # A key and it's value
     # The name of the key
-    'hgcfg.item.key': 'none',
+    b'hgcfg.item.key': b'none',
     # Whatever comes between the name and the value (e.g., '=')
-    'hgcfg.item.sep': 'none',
+    b'hgcfg.item.sep': b'none',
     # The value of the key, but not the active value (i.e., it is overridden).
-    'hgcfg.item.value': 'none',
+    b'hgcfg.item.value': b'none',
     # The active value of the key (i.e, not overridden anywhere).
-    'hgcfg.item.value.selected': 'bold',
+    b'hgcfg.item.value.selected': b'bold',
 
     # The key name printed with `hg config SECTION.KEY --verbose`.
-    'hgcfg.keyname': 'bold'
+    b'hgcfg.keyname': b'bold'
 }
 
-testedwith = '5.3.0'
+testedwith = b'5.3.2'
